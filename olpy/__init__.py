@@ -1,8 +1,8 @@
-from olpy._model import Model, BCModelWithLabelEncoding
+from olpy._model import Model, OnlineLearningModel
 
 all(
     [
         Model,
-        BCModelWithLabelEncoding
+        OnlineLearningModel
     ]
 )

@@ -7,7 +7,7 @@ from ._alma import ALMA
 from ._arow import AROW
 from ._cw import ConfidenceWeighted, SoftConfidenceWeighted
 from ._narow import NAROW
-from ._romma import ROMMA
+from ._romma import ROMMA, AgressiveROMMA
 
 all(
     [
@@ -24,6 +24,7 @@ all(
         ConfidenceWeighted,
         SoftConfidenceWeighted,
         NAROW,
-        ROMMA
+        ROMMA,
+        AgressiveROMMA
     ]
 )
