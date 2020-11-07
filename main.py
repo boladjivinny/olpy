@@ -171,7 +171,7 @@ if __name__ == '__main__':
            1094, 934, 1039,
            ]
 
-    model = AgressiveROMMA()
+    model = aROMMA()
     model.fit(X_train, y_train, idx=idx)
     print(model.weights)
 
