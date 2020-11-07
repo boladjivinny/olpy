@@ -3,25 +3,56 @@ import numpy as np
 from olpy import OnlineLearningModel
 
 
-class NormalHerd(OnlineLearningModel):
+class NHerd(OnlineLearningModel):
     # Need to check the r parameter 
-    def __init__(self, a=1, C=1):
-        super().__init__()
+    def __init__(self, a=1, C=1, num_iterations=20, random_state=None, positive_label=1):
+        """
+        Instantiate an Normal Herd model for training.
+
+        This function creates an instance of the NHerd online learning
+        algorithm.
+
+        Crammer, K. & Lee, D., Learning via gaussian herding, Advances
+        in Neural Information Processing Systems, Curran Associates, 
+        Inc., 2010, 23, 451-459
+
+        Parameters
+        ----------
+        a   : float, default 1
+            Trade-off parameter. a is in the range [0,1]
+        C : float, default 1
+            Normal Herd's parameter. C > 0
+        num_iterations: int
+            Represents the number of iterations to run the algorithm.
+        random_state:   int, default None
+            Seed for the pseudorandom generator
+        positive_label: 1 or -1
+            Represents the value that is used as positive_label.
+
+        Returns
+        -------
+        None
+        """
+        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
         self.a = a
-        self.gamma = 1/C
-        self.Sigma = None
+        self.C = C
+        self.sigma = None
 
-    def update(self, x: np.ndarray, y: int):
-        f_t = self.weights.dot(x)
-        v_t = x @ self.Sigma @ x.T
-        m_t = y * f_t
-        l_t = 1 - m_t
-        if l_t > 0:
-            beta_t = 1 / (v_t + self.gamma)
-            alpha_t = max(0, 1 - m_t) * beta_t
-            S_x_t = np.expand_dims(x @ self.Sigma.T, axis=0)
-            self.weights = self.weights + alpha_t * y * np.squeeze(S_x_t)
-            self.Sigma = self.Sigma - (beta_t ** 2) * (v_t + 2 * self.gamma) * S_x_t.T @ S_x_t
+    def _update(self, x: np.ndarray, y: int):
+        decision = self.weights.dot(x)
+        v = x @ self.sigma @ x.T
+        m = y * decision
+        loss = 1 - m
+        if loss > 0:
+            beta = 1 / (v + 1/self.C)
+            alpha = max(0, 1 - m) * beta
+            sigma = np.expand_dims(x @ self.sigma.T, axis=0)
+            self.weights = self.weights + alpha * y * np.squeeze(sigma)
+            self.sigma = self.sigma - (beta ** 2) * (v + 2 * (1/self.C)) * sigma.T @ sigma
 
-    def setup(self, X: np.ndarray, Y: np.ndarray):
-        self.Sigma = self.a * np.eye(X.shape[1])
+    def _setup(self, X: np.ndarray):
+        self.sigma = self.a * np.eye(X.shape[1])
+
+    def get_params(self, deep=True):
+        return {'a': self.a, 'C': self.C, 'num_iterations':\
+             self.num_iterations}

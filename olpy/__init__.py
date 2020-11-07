@@ -1,8 +1,7 @@
-from olpy._model import Model, OnlineLearningModel
+from olpy._model import OnlineLearningModel
 
 all(
     [
-        Model,
         OnlineLearningModel
     ]
 )

@@ -1,30 +1,30 @@
-from .__iellip import ImprovedEllipsoid
-from .__nherd import NormalHerd
-from .__ogd import OnlineGradientDescent
-from .__pa import PassiveAggressive, PassiveAggressiveI, PassiveAggressiveII
+from .__iellip import IELLIP
+from .__nherd import NHerd
+from .__ogd import OGD
+from .__pa import PA, PA_I, PA_II
 from .__perceptron import Perceptron, SecondOrderPerceptron
-from ._alma import ALMA
-from ._arow import AROW
-from ._cw import ConfidenceWeighted, SoftConfidenceWeighted
-from ._narow import NAROW
-from ._romma import ROMMA, AgressiveROMMA
+from .__alma import ALMA
+from .__arow import AROW
+from .__cw import CW, SCW
+from .__narow import NAROW
+from .__romma import ROMMA, aROMMA
 
 all(
     [
-        ImprovedEllipsoid,
-        NormalHerd,
-        OnlineGradientDescent,
-        PassiveAggressive,
-        PassiveAggressiveI,
-        PassiveAggressiveII,
+        IELLIP,
+        NHerd,
+        OGD,
+        PA,
+        PA_I,
+        PA_II,
         Perceptron,
         SecondOrderPerceptron,
         ALMA,
         AROW,
-        ConfidenceWeighted,
-        SoftConfidenceWeighted,
+        CW,
+        SCW,
         NAROW,
         ROMMA,
-        AgressiveROMMA
+        aROMMA
     ]
 )
