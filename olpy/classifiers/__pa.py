@@ -5,7 +5,8 @@ from olpy._model import OnlineLearningModel
 
 
 class PA(OnlineLearningModel):
-    # Need to check the r parameter 
+    name = "Passive-Aggressive"
+
     def __init__(self, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiates the Passive-Aggressive Model for training.
@@ -61,6 +62,8 @@ class PA(OnlineLearningModel):
 
 
 class PA_I(PA):
+    name = "Passive-Aggressive-I"
+    
     def __init__(self, C=1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiates the Passive-Aggressive-I Model for training.
@@ -97,6 +100,8 @@ class PA_I(PA):
 
 
 class PA_II(PA):
+    name = "Passive-Aggressive-II"
+    
     def __init__(self, C=1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiates the Passive-Aggressive-II Model for training.

@@ -5,6 +5,8 @@ from olpy import OnlineLearningModel
 
 
 class IELLIP(OnlineLearningModel):
+    name = "Improved Ellipsoid"
+    
     def __init__(self, a=1, b=0.3, c=0.1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate an IELLIP model for training.

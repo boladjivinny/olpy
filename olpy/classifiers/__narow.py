@@ -3,7 +3,8 @@ from olpy._model import OnlineLearningModel
 
 
 class NAROW(OnlineLearningModel):
-    # Need to check the r parameter 
+    name = "NAROW"
+    
     def __init__(self, a=1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate a new NAROW model for training.

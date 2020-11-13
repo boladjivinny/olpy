@@ -1,7 +1,7 @@
-import numpy as np
 import time
+import random
 
-from numpy.random import seed, permutation
+import numpy as np
 
 from olpy.preprocessing import LabelEncoder
 
@@ -29,9 +29,9 @@ class OnlineLearningModel():
         self.labels = None
         self.num_iterations = num_iterations
         self.positive_label = positive_label
+        self.random_state = random_state
 
         # Setting the random seed
-        seed(random_state)
 
     def fit(self, X: np.ndarray, Y: np.ndarray, verbose=True, **kwargs):
         """
@@ -57,12 +57,12 @@ class OnlineLearningModel():
         self.weights = np.zeros(X.shape[1])
         y_transformed, self.labels = LabelEncoder(positive_label=positive_label)\
                                             .fit_transform(Y, return_labels=True)
-        seed(random_state)
+        random.seed(self.random_state)
         self._setup(X)
         
         for iteration in range(1, self.num_iterations+1):
             start = time.time()
-            idx = permutation(X.shape[0])
+            idx = random.sample(range(X.shape[0]), k=X.shape[0])
 
             for x, y in zip(X[idx, :], y_transformed[idx]):
                 self._update(x, y)

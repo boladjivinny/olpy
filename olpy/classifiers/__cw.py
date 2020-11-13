@@ -6,7 +6,7 @@ from olpy._model import OnlineLearningModel
 
 
 class CW(OnlineLearningModel):
-    # Need to check the r parameter 
+    name = "Confidence-Weighted"
     def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate a Confidence Weighted model for training.
@@ -69,6 +69,8 @@ class CW(OnlineLearningModel):
 
 
 class SCW(CW):
+    name = "Soft Confidence-Weighted"
+
     def __init__(self, eta=0.7, C=1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate a SOft Confidence Weighted model for training.

@@ -5,6 +5,8 @@ from olpy._model import OnlineLearningModel
 
 
 class ROMMA(OnlineLearningModel):
+    name = "ROMMA"
+    
     def __init__(self, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate a ROMMA model for training.
@@ -61,6 +63,7 @@ class ROMMA(OnlineLearningModel):
 
 
 class aROMMA(ROMMA):
+    name = "Aggressive ROMMA"
     def _is_mistake(self, x: np.ndarray, y: int):
         f_t = self.weights.dot(x)
         l_t = 1 - y * f_t

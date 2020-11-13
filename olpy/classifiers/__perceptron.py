@@ -5,6 +5,8 @@ from olpy import OnlineLearningModel
 
 
 class Perceptron(OnlineLearningModel):
+    name = "Perceptron"
+
     def __init__(self, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiates the Perceptron model for training.
@@ -35,7 +37,9 @@ class Perceptron(OnlineLearningModel):
 
 
 class SecondOrderPerceptron(Perceptron):
-    def __init__(self, a=1, num_iterations=20, random_state=None, positive_label=1):
+    name = "Second Order Perceptron"
+    
+    def __init__(self, a=0.7, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate a Second Order Perceptron instance for training.
 
@@ -61,29 +65,32 @@ class SecondOrderPerceptron(Perceptron):
         super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
         self.a = a
 
-    def _setup(self, X, y):
-        self.sigma = self.a * np.eye(X.shape[1])
+    def _setup(self, X: np.ndarray):
+        #self.sigma = self.a * np.eye(X.shape[1])
+        self.S = []
 
     def _update(self, x: np.ndarray, y: int):
-        sigma = x @ self.sigma
-        v_t = x @ sigma.T
-        beta_t = 1 / (v_t + 1)
-        self.sigma = self.sigma - beta_t * sigma.T @ sigma
-
-        prediction = np.sign(self.weights @ self.sigma @ x.T)
-
+        #print(self.S.shape, x.shape)
+        S_t = self.S
+        S_t.append(x)
+        S_t_ = np.array(S_t)
+        S_t_ = S_t_.T
+        w = LA.inv(self.a * np.identity(len(x)) + S_t_ @ S_t_.T)
+        w = w @ self.weights
+        prediction = np.sign(w.T @ x)
+        if prediction == 0:
+            prediction = 1
         if y != prediction:
             self.weights = self.weights + y * x
+            self.S = S_t
 
     def predict(self, data):
-        sigma = data @ self.sigma
-        v = data @ sigma.T
-        beta = LA.inv(v + np.ones(data.shape[0], data.shape[1]))
-        sigma_pred = self.sigma - beta @ sigma.T @ sigma
-
-        pred = self.weights @ sigma_pred @ data.T
-
-        return [self.labels[0] if x < 0 else 1 for x in pred]
+        S_t = (np.array(self.S)).T
+        w = LA.inv(self.a * np.identity(data.shape[1]) + S_t @ S_t.T)
+        w = w @ self.weights
+        prediction = np.sign(w.T @ data.T)
+        
+        return [0 if pred < 0 else 1 for pred in prediction]
 
     def get_params(self):
         return {'a': self.a, 'num_iterations': self.num_iterations}

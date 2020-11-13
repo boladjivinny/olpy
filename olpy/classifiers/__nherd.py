@@ -4,7 +4,8 @@ from olpy import OnlineLearningModel
 
 
 class NHerd(OnlineLearningModel):
-    # Need to check the r parameter 
+    name = "Normal Herd"
+    
     def __init__(self, a=1, C=1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate an Normal Herd model for training.

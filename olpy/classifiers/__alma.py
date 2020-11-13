@@ -7,6 +7,8 @@ from olpy import OnlineLearningModel
 
 
 class ALMA(OnlineLearningModel):
+    name = "ALMA"
+    
     def __init__(self, alpha=1.0, p=2, q=2, B=1, C=1, num_iterations=20, random_state=None, positive_label=1):
         super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
         """

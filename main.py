@@ -1,177 +1,171 @@
+import argparse
+import time
+import os
+
+import pandas as pd
 import numpy as np
+
+from sklearn.metrics import accuracy_score, roc_auc_score, recall_score, f1_score
+from sklearn.preprocessing import MinMaxScaler
 from olpy.classifiers import *
 
+def print_models():
+    models = {
+        'alma'  : 'A New Approximate Maximal Margin Classification Algorithm (ALMA)',
+        'arow'  : 'Adaptive regularization of weight vectors (AROW)',
+        'cw'    : 'Confidence Weighted',
+        'scw'   : 'Soft Confidence Weighted',
+        'iellip': 'Improved Ellipsoid',
+        'narow' : 'New adaptive algorithms for online classification',
+        'nherd' : 'Normal Herd',
+        'ogd'   : 'Online Gradient Descent',
+        'pa'    : 'Passive Aggressive',
+        'pa1'   : 'Passive Aggressive I',
+        'pa2'   : 'Passive Aggressive II',
+        'perceptron': 'Perceptron',
+        'sop'   : 'Second Order Perceptron',
+        'romma' : 'Relaxed Online Maximum Margin Algorithm',
+        'aromma': 'Aggressive ROMMA'
+    }
+
+    message = ''
+    for short, desc in models.items():
+        message += short + "\t\t:" + desc
+        message += '\n'
+
+    return message
+
+
+parser = argparse.ArgumentParser(description='After receiving input\
+          from the user, this program train a series of Online Machine\
+          Learning models for binary classification.')
+
+parser.add_argument('train_set', metavar='TRAINING', \
+             help='file containing the training dataset. CSV file \
+                         expected', type=argparse.FileType('r'), nargs=1)
+parser.add_argument('test_set', metavar='TESTING', \
+                help='containing the test dataset. CSV file \
+                        expected', type=argparse.FileType('r'), nargs=1)
+parser.add_argument('-l', '--label', type=str, default='Label', \
+                    help='index of the target variable.\
+                        (default:  %(default)s)')
+parser.add_argument('--models', type=str, nargs='+', default='--all',\
+                help='The list of models to try from. \n Choices are: \
+                        \n' + print_models() + '. or use use %(default)s')
+parser.add_argument('-n', type=int, default=1, help='the number of \
+                        iterations to run. (default: \
+                        %(default)s)')
+parser.add_argument('-s', type=int, default=None, help='the random seed\
+                        to use in training the models. (default: \
+                        %(default)s)')
+parser.add_argument('-o', type=str, default='experiment-results.csv',\
+                        help='file to which the reports would be saved\
+                        (default: %(default)s)')
+parser.add_argument('-v', '--verbose', help='whether the program should\
+                            have a verbose output or not', action='count'\
+                                , default=0)
+
+
 if __name__ == '__main__':
-    train_data = np.loadtxt('data/svmguide3', delimiter=',')
-    test_data = np.loadtxt('data/svmguide3.t', delimiter=',')
+    args = parser.parse_args()
+    # Collect the arguments
+    train_file = args.train_set[0]
+    test_file = args.test_set[0]
+    verbose = args.verbose > 0
+    output_file = args.o
+    seed = args.s
+    models = args.models
+    n_iterations = args.n
+    label = args.label
 
-    X_train = train_data[:, 1:]
-    # for ind in range(X_train.shape[1]):
-    #     X_train[:, ind] = (X_train[:, ind] - X_train[:, ind].min()) / X_train[:, ind].max() - X_train[:, ind].min()
-    y_train = train_data[:, 0]
+    # First we replace all by the list of available models
+    if models == '--all' or '--all' in models:
+        models = ['alma', 'arow', 'cw', 'scw', 'iellip', 'narow', 'nherd',
+                     'ogd', 'pa', 'pa1', 'pa2', 'perceptron', 'sop', 'romma', 'aromma']
+    
+    # Create a variable to store the model objects
+    models_ = []
+    for model in set(models):
+        model = model.lower()
+        if model == 'alma':
+            models_.append(ALMA(random_state=seed, num_iterations=n_iterations))
+        if model == 'arow':
+            models_.append(AROW(random_state=seed, num_iterations=n_iterations))
+        if model == 'cw':
+            models_.append(CW(random_state=seed, num_iterations=n_iterations))
+        if model == 'scw':
+            models_.append(SCW(random_state=seed, num_iterations=n_iterations))
+        if model == 'iellip':
+            models_.append(IELLIP(random_state=seed, num_iterations=n_iterations))
+        if model == 'narow':
+            models_.append(NAROW(random_state=seed, num_iterations=n_iterations))
+        if model == 'nherd':
+            models_.append(NHerd(random_state=seed, num_iterations=n_iterations))
+        if model == 'ogd':
+            models_.append(OGD(random_state=seed, num_iterations=n_iterations))
+        if model == 'pa':
+            models_.append(PA(random_state=seed, num_iterations=n_iterations))
+        if model == 'pa1':
+            models_.append(PA_I(random_state=seed, num_iterations=n_iterations))
+        if model == 'pa2':
+            models_.append(PA_II(random_state=seed, num_iterations=n_iterations))
+        if model == 'perceptron':
+            models_.append(Perceptron(random_state=seed, num_iterations=n_iterations))
+        if model == 'sop':
+            models_.append(SecondOrderPerceptron(random_state=seed, num_iterations=n_iterations))
+        if model == 'romma':
+            models_.append(ROMMA(random_state=seed, num_iterations=n_iterations))
+        if model == 'aromma':
+            models_.append(aROMMA(random_state=seed, num_iterations=n_iterations))
 
-    X_test = test_data[:, 1:]
-    y_test = test_data[:, 0]
+    # Load the datasets
+    scaler = MinMaxScaler()
+    train_data = pd.read_csv(train_file)
+    test_data = pd.read_csv(test_file)
 
-    idx = [687, 310, 343, 747, 1050, 349, 367, 153,
-           638, 898, 321, 740, 1034, 1166, 991, 647,
-           786, 1108, 1213, 463, 772, 272, 835, 316,
-           1065, 8, 805, 473, 978, 665, 403, 960,
-           635, 156, 1227, 40, 671, 851, 152, 925,
-           470, 553, 472, 1103, 893, 678, 507, 1173,
-           953, 1079, 199, 347, 799, 284, 198, 583,
-           1112, 197, 940, 45, 667, 318, 47, 1137,
-           296, 96, 443, 531, 1078, 382, 1091, 894,
-           164, 733, 252, 293, 1189, 1080, 905, 887,
-           741, 568, 73, 774, 273, 402, 985, 208,
-           897, 1190, 464, 797, 485, 1200, 524, 435,
-           117, 664, 1135, 465, 291, 17, 522, 616,
-           432, 362, 433, 813, 179, 222, 999, 676,
-           590, 1054, 372, 59, 1066, 685, 359, 35,
-           303, 1051, 1171, 1155, 623, 356, 560, 119,
-           541, 720, 829, 753, 188, 534, 545, 415,
-           233, 167, 268, 1225, 775, 781, 529, 353,
-           215, 572, 70, 426, 1042, 466, 1068, 88,
-           691, 1152, 504, 916, 549, 808, 36, 183,
-           881, 982, 611, 32, 368, 543, 987, 234,
-           633, 202, 860, 9, 662, 913, 281, 1077,
-           1069, 1140, 615, 1163, 60, 628, 311, 146,
-           535, 769, 277, 1097, 563, 275, 1226, 910,
-           949, 326, 1153, 838, 439, 422, 76, 489,
-           239, 1132, 673, 196, 132, 131, 229, 140,
-           657, 609, 605, 162, 1161, 690, 850, 1197,
-           251, 1083, 274, 313, 346, 427, 607, 1240,
-           581, 1203, 99, 186, 766, 1192, 924, 509,
-           28, 589, 219, 689, 330, 1001, 911, 947,
-           369, 12, 116, 497, 454, 479, 1179, 1006,
-           1053, 817, 1232, 655, 332, 684, 438, 896,
-           580, 374, 184, 159, 1217, 241, 875, 636,
-           834, 469, 174, 6, 380, 750, 793, 1160,
-           1106, 748, 335, 849, 602, 50, 980, 974,
-           397, 81, 1198, 645, 358, 863, 85, 1202,
-           421, 1167, 1109, 510, 700, 686, 1145, 546,
-           25, 287, 333, 481, 738, 824, 381, 1014,
-           65, 414, 336, 843, 160, 455, 232, 155,
-           200, 453, 456, 574, 815, 594, 948, 20,
-           1027, 996, 1076, 398, 1016, 312, 984, 109,
-           341, 393, 1146, 726, 366, 981, 832, 670,
-           1100, 701, 394, 1182, 95, 110, 1060, 695,
-           390, 784, 739, 804, 1159, 1007, 77, 731,
-           1139, 1047, 619, 379, 361, 873, 1238, 599,
-           656, 540, 836, 107, 92, 475, 1121, 650,
-           1071, 204, 203, 178, 345, 98, 1216, 833,
-           927, 837, 904, 724, 1195, 266, 413, 93,
-           711, 1130, 254, 148, 746, 528, 329, 1219,
-           932, 604, 718, 106, 38, 735, 551, 323,
-           319, 216, 745, 112, 707, 138, 907, 365,
-           193, 128, 1127, 189, 826, 582, 818, 922,
-           78, 703, 842, 1196, 755, 825, 331, 858,
-           571, 458, 300, 1193, 1176, 1011, 63, 1204,
-           288, 265, 459, 812, 1104, 1141, 141, 569,
-           672, 1020, 214, 1089, 1183, 450, 1010, 452,
-           292, 989, 423, 778, 1178, 1019, 868, 27,
-           1037, 1142, 282, 101, 1218, 1201, 831, 269,
-           294, 988, 82, 751, 24, 62, 173, 471,
-           640, 172, 1229, 1133, 506, 928, 261, 357,
-           494, 760, 289, 420, 840, 260, 1181, 986,
-           990, 617, 736, 846, 514, 124, 1024, 641,
-           337, 207, 857, 878, 821, 533, 900, 713,
-           515, 10, 648, 1237, 511, 259, 558, 814,
-           123, 782, 728, 714, 1239, 612, 1057, 377,
-           613, 324, 1220, 547, 457, 1003, 802, 902,
-           883, 1172, 971, 596, 133, 1164, 90, 161,
-           587, 7, 1117, 1070, 1095, 554, 255, 1162,
-           244, 1149, 759, 142, 573, 938, 823, 1151,
-           484, 630, 669, 49, 46, 696, 762, 705,
-           909, 350, 1187, 770, 777, 756, 1045, 1129,
-           231, 1058, 21, 704, 567, 67, 508, 1004,
-           828, 55, 37, 936, 622, 559, 807, 732,
-           956, 941, 56, 462, 1214, 495, 271, 1105,
-           11, 299, 383, 114, 1114, 195, 527, 1234,
-           1211, 1017, 544, 780, 13, 1041, 1158, 765,
-           995, 404, 1116, 279, 722, 1030, 1072, 1002,
-           598, 767, 1169, 91, 22, 861, 135, 1062,
-           783, 385, 181, 822, 409, 304, 708, 933,
-           1168, 889, 801, 632, 297, 591, 866, 351,
-           157, 180, 364, 51, 521, 1038, 151, 601,
-           931, 399, 792, 626, 1115, 742, 498, 1087,
-           586, 137, 1110, 917, 205, 309, 177, 334,
-           100, 280, 317, 552, 575, 864, 505, 23,
-           144, 885, 270, 593, 566, 806, 1032, 1015,
-           488, 853, 1081, 525, 1165, 285, 1123, 773,
-           631, 58, 1122, 120, 692, 1022, 1194, 15,
-           698, 384, 322, 939, 41, 154, 1215, 213,
-           663, 997, 441, 440, 1026, 979, 437, 702,
-           263, 744, 86, 267, 963, 768, 111, 2,
-           191, 225, 964, 1013, 434, 1031, 865, 26,
-           914, 176, 487, 192, 149, 130, 1043, 220,
-           624, 629, 1210, 125, 625, 639, 1128, 502,
-           920, 968, 666, 976, 1175, 467, 238, 446,
-           538, 1188, 1241, 480, 785, 264, 1184, 603,
-           386, 327, 1009, 474, 1131, 209, 406, 72,
-           550, 483, 158, 930, 871, 1199, 1093, 1099,
-           1228, 618, 869, 754, 74, 1101, 584, 942,
-           1046, 819, 165, 342, 967, 113, 847, 649,
-           1119, 597, 856, 247, 519, 1064, 1148, 962,
-           301, 1191, 418, 943, 376, 536, 1143, 844,
-           965, 1073, 228, 820, 879, 352, 378, 1067,
-           1212, 389, 994, 64, 891, 954, 1230, 637,
-           79, 884, 248, 1036, 211, 1049, 634, 1222,
-           223, 1156, 430, 243, 929, 500, 899, 729,
-           1086, 972, 258, 401, 614, 339, 1124, 194,
-           890, 957, 576, 370, 790, 375, 240, 966,
-           970, 600, 901, 482, 449, 182, 908, 61,
-           512, 659, 338, 561, 201, 33, 392, 221,
-           1223, 1134, 1224, 286, 737, 1028, 276, 867,
-           1092, 80, 429, 935, 743, 1236, 43, 1233,
-           520, 537, 789, 758, 1029, 150, 517, 283,
-           530, 699, 278, 126, 892, 757, 983, 29,
-           460, 1138, 610, 1056, 523, 1082, 679, 242,
-           83, 585, 5, 1096, 915, 539, 490, 257,
-           1126, 298, 44, 1113, 102, 307, 18, 388,
-           84, 730, 794, 1018, 442, 419, 1174, 417,
-           115, 681, 355, 855, 122, 880, 94, 1186,
-           52, 712, 592, 400, 877, 476, 565, 39,
-           1044, 608, 1147, 348, 75, 503, 246, 1021,
-           139, 354, 958, 97, 3, 217, 360, 129,
-           795, 715, 1231, 1221, 1208, 227, 30, 210,
-           477, 776, 1023, 973, 876, 727, 53, 1107,
-           959, 513, 761, 752, 185, 872, 395, 800,
-           620, 841, 788, 103, 31, 810, 230, 1,
-           723, 410, 121, 4, 1088, 579, 396, 950,
-           1008, 57, 305, 595, 1243, 734, 314, 787,
-           719, 923, 1074, 68, 675, 654, 564, 290,
-           882, 803, 848, 1154, 302, 725, 492, 405,
-           1052, 245, 451, 14, 643, 411, 1170, 166,
-           830, 1025, 1209, 816, 1185, 888, 253, 461,
-           1005, 653, 424, 946, 1063, 562, 444, 937,
-           845, 1061, 416, 163, 436, 170, 1055, 143,
-           874, 1000, 642, 945, 791, 371, 542, 1125,
-           716, 870, 862, 1150, 1098, 171, 895, 190,
-           798, 1120, 445, 839, 1035, 796, 955, 118,
-           771, 34, 71, 1207, 448, 315, 556, 709,
-           683, 532, 961, 1040, 69, 87, 373, 212,
-           919, 859, 674, 328, 89, 1144, 646, 763,
-           912, 127, 1048, 651, 325, 1206, 412, 706,
-           340, 969, 668, 977, 42, 493, 249, 688,
-           903, 134, 710, 578, 1177, 854, 1084, 1090,
-           104, 1033, 1205, 570, 431, 407, 555, 147,
-           1235, 1012, 428, 680, 1059, 295, 1118, 136,
-           224, 682, 496, 1075, 998, 661, 306, 48,
-           717, 175, 105, 693, 926, 944, 588, 19,
-           187, 557, 363, 886, 320, 764, 992, 387,
-           526, 621, 408, 652, 236, 811, 677, 951,
-           250, 491, 1102, 425, 1180, 694, 577, 1111,
-           1085, 1157, 644, 921, 721, 749, 54, 478,
-           501, 499, 344, 256, 218, 206, 108, 518,
-           993, 1136, 308, 606, 391, 852, 486, 66,
-           516, 468, 658, 262, 827, 918, 660, 169,
-           237, 975, 447, 906, 952, 809, 779, 226,
-           168, 548, 697, 145, 16, 235, 627, 1242,
-           1094, 934, 1039,
-           ]
+    Y_train = train_data.loc[:, label].to_numpy()
+    X_train = scaler.fit_transform(train_data.drop(columns=[label]))
 
-    model = aROMMA()
-    model.fit(X_train, y_train, idx=idx)
-    print(model.weights)
+    Y_test = test_data.loc[:, label].to_numpy()
+    X_test = scaler.fit_transform(test_data.drop(columns=[label]))
 
+
+    summary = pd.DataFrame(np.zeros((len(models_), 6)), columns=['Training_Time', \
+                                    'Prediction_Time', 'Accuracy', 'F1-Score', 'Recall', \
+                                        'ROC_AUC-Score'])
+    summary.insert(0, 'Model', [model.name for model in models_])
+
+    if verbose:
+        print('Algorithm\t\tTrain time (s)\t\tTest time(s)\t\tAccuracy\t\tF1-Score\t\tRecall\t\tROC-AUC')
+        print()
+
+    i = 0
+    for model in models_:
+        training_start = time.time()
+        # Try, catch to avoid errors stopping the program
+        try:
+            model.fit(X_train, Y_train, verbose=False)
+            duration = time.time() - training_start
+
+            scores = model.decision_function(X_test)
+            test_start = time.time()
+            preds = model.predict(X_test)
+            preds_duration = time.time() - test_start
+
+            acc = accuracy_score(Y_test, preds)
+            f1 = f1_score(Y_test, preds)
+            recall = recall_score(Y_test, preds)
+            roc = roc_auc_score(Y_test, scores)
+
+            if verbose:
+                print("{}\t\t\t{}\t{}\t{}\t{}\t{}\t{}".format(list(set(models))[i][:7], duration, \
+                                                    preds_duration, acc, f1, recall, roc))
+            summary.loc[i, 'Training_Time'] = duration
+            summary.loc[i, 'Prediction_Time'] = preds_duration
+            summary.loc[i, 'Accuracy'] = acc
+            summary.loc[i, 'F1-Score'] = f1
+            summary.loc[i, 'Recall'] = recall
+            summary.loc[i, 'ROC_AUC-Score'] = roc
+        except Exception as e:
+            print(model.name, "- Failed\n", e)
+        i = i + 1

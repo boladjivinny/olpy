@@ -6,7 +6,8 @@ from olpy import OnlineLearningModel
 
 
 class OGD(OnlineLearningModel):
-    # Need to check the r parameter 
+    name = "Online Gradient Descent"
+    
     def __init__(self, C=1, loss_function=zero_one_loss, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate an Online Gradient Descent model for training.

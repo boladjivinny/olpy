@@ -3,7 +3,8 @@ from olpy._model import OnlineLearningModel
 
 
 class AROW(OnlineLearningModel):
-    # Need to check the r parameter 
+    name = "AROW"
+    
     def __init__(self, r=1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate an AROW model for training.
@@ -42,7 +43,7 @@ class AROW(OnlineLearningModel):
             self.weights += alpha_t * y * np.squeeze(sigma)
             self.sigma -= beta_t * sigma.T @ sigma
 
-    def _setup(self, X: np.ndarray, Y: np.ndarray):
+    def _setup(self, X: np.ndarray):
         self.sigma = np.identity(X.shape[1])
 
     def get_params(self):
