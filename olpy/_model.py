@@ -52,7 +52,6 @@ class OnlineLearningModel():
         self
         """
         positive_label = kwargs.get('positive_label', 1)
-        random_state = kwargs.get('random_state', None)
 
         self.weights = np.zeros(X.shape[1])
         y_transformed, self.labels = LabelEncoder(positive_label=positive_label)\
