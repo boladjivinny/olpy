@@ -169,3 +169,4 @@ if __name__ == '__main__':
         except Exception as e:
             print(model.name, "- Failed\n", e)
         i = i + 1
+    summary.to_csv(output_file, index=False)
