@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import numpy as np
 
-from sklearn.metrics import accuracy_score, roc_auc_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, roc_auc_score, recall_score, f1_score, confusion_matrix
 from sklearn.preprocessing import MinMaxScaler
 from olpy.classifiers import *
 
@@ -130,13 +130,17 @@ if __name__ == '__main__':
     X_test = scaler.fit_transform(test_data.drop(columns=[label]))
 
 
-    summary = pd.DataFrame(np.zeros((len(models_), 6)), columns=['Training_Time', \
-                                    'Prediction_Time', 'Accuracy', 'F1-Score', 'Recall', \
-                                        'ROC_AUC-Score'])
+    summary = pd.DataFrame(np.zeros((len(models_), 10)), columns=['Training-Time', \
+                                    'Prediction-Time', 'Accuracy', 'F1-Score', 'Recall', \
+                                        'ROC_AUC-Score', 'FP', 'FN', 'TP', 'TN'])
     summary.insert(0, 'Model', [model.name for model in models_])
 
     if verbose:
-        print('Algorithm\t\tTrain time (s)\t\tTest time(s)\t\tAccuracy\t\tF1-Score\t\tRecall\t\tROC-AUC')
+        # print("%-15s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" % (list(set(models))[i], duration, \
+        #                                             preds_duration, acc, f1, recall, roc, tp, tn, fp, fn))
+        print("%9s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s" % \
+                    ('algorithm', 'train time (s)', 'test time (s)', 'accuracy', 'f1-score', 'recall', 'roc-auc',\
+                     'true positive', 'true negative', 'false positive', 'false negative'))
         print()
 
     i = 0
@@ -155,17 +159,24 @@ if __name__ == '__main__':
             acc = accuracy_score(Y_test, preds)
             f1 = f1_score(Y_test, preds)
             recall = recall_score(Y_test, preds)
+            tn, fp, fn, tp = confusion_matrix(Y_test, preds, normalize='all').ravel()
+
             roc = roc_auc_score(Y_test, scores)
+            
 
             if verbose:
-                print("{}\t\t\t{}\t{}\t{}\t{}\t{}\t{}".format(list(set(models))[i][:7], duration, \
-                                                    preds_duration, acc, f1, recall, roc))
-            summary.loc[i, 'Training_Time'] = duration
-            summary.loc[i, 'Prediction_Time'] = preds_duration
+                print("%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" % (list(set(models))[i], 1000*duration, \
+                                                    1000*preds_duration, acc, f1, recall, roc, tp, tn, fp, fn))
+            summary.loc[i, 'Training-Time'] = duration
+            summary.loc[i, 'Prediction-Time'] = preds_duration
             summary.loc[i, 'Accuracy'] = acc
             summary.loc[i, 'F1-Score'] = f1
             summary.loc[i, 'Recall'] = recall
             summary.loc[i, 'ROC_AUC-Score'] = roc
+            summary.loc[i, 'TP'] = tp
+            summary.loc[i, 'TN'] = tn
+            summary.loc[i, 'FP'] = fp
+            summary.loc[i, 'FN'] = fn
         except Exception as e:
             print(model.name, "- Failed\n", e)
         i = i + 1

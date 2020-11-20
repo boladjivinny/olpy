@@ -66,31 +66,21 @@ class SecondOrderPerceptron(Perceptron):
         self.a = a
 
     def _setup(self, X: np.ndarray):
-        #self.sigma = self.a * np.eye(X.shape[1])
-        self.S = []
+        self.sigma = self.a * np.identity(X.shape[1])
 
     def _update(self, x: np.ndarray, y: int):
-        #print(self.S.shape, x.shape)
-        S_t = self.S
-        S_t.append(x)
-        S_t_ = np.array(S_t)
-        S_t_ = S_t_.T
-        w = LA.inv(self.a * np.identity(len(x)) + S_t_ @ S_t_.T)
-        w = w @ self.weights
-        prediction = np.sign(w.T @ x)
-        if prediction == 0:
-            prediction = 1
-        if y != prediction:
-            self.weights = self.weights + y * x
-            self.S = S_t
+        x_ = np.expand_dims(x, axis=0)
+        s_t = x_ @ self.sigma.T
+        v_t = x_ @ s_t.T
+        beta_t = 1/(v_t + 1)
+        sigma_t = self.sigma - beta_t * (s_t.T @ s_t)
+        f_t = self.weights @ sigma_t @ x_.T
 
-    def predict(self, data):
-        S_t = (np.array(self.S)).T
-        w = LA.inv(self.a * np.identity(data.shape[1]) + S_t @ S_t.T)
-        w = w @ self.weights
-        prediction = np.sign(w.T @ data.T)
-        
-        return [0 if pred < 0 else 1 for pred in prediction]
+        hat_y_t = 1 if f_t >= 0 else 0
+        if hat_y_t != y:
+            self.weights = self.weights + y * x
+
+        self.sigma = sigma_t
 
     def get_params(self):
         return {'a': self.a, 'num_iterations': self.num_iterations}
