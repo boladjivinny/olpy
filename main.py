@@ -159,7 +159,7 @@ if __name__ == '__main__':
             acc = accuracy_score(Y_test, preds)
             f1 = f1_score(Y_test, preds)
             recall = recall_score(Y_test, preds)
-            tn, fp, fn, tp = confusion_matrix(Y_test, preds, normalize='all').ravel()
+            tn, fp, fn, tp = confusion_matrix(Y_test, preds, normalize='true').ravel()
 
             roc = roc_auc_score(Y_test, scores)
             
