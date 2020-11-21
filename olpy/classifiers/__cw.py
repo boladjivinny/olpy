@@ -64,8 +64,9 @@ class CW(OnlineLearningModel):
         self.psi = 1 + (self.phi ** 2) / 2
         self.xi = 1 + self.phi ** 2
 
-    def get_params(self):
-        return {'a': self.a, 'eta': self.eta, 'num_iterations': self.num_iterations}
+    def get_params(self, deep=True):
+        return {'a': self.a, 'eta': self.eta, 'num_iterations': \
+            self.num_iterations, 'random_state': self.random_state}
 
 
 class SCW(CW):
@@ -106,5 +107,6 @@ class SCW(CW):
                                                       self.xi)) / (v_t * self.xi))
         return min(alpha_t, self.C)
 
-    def get_params(self):
-        return {'C': self.C, 'eta': self.eta, 'num_iterations': self.num_iterations}
+    def get_params(self, deep=True):
+        return {'C': self.C, 'eta': self.eta, 'num_iterations': \
+            self.num_iterations, 'random_state': self.random_state}

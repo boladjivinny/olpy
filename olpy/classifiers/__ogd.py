@@ -64,9 +64,10 @@ class OGD(OnlineLearningModel):
 
         self.t += 1
 
-    def get_params(self):
+    def get_params(self, deep=True):
         return {'C': self.C, 'loss_function': self.loss_function,\
-            'num_iterations': self.num_iterations}
+            'num_iterations': self.num_iterations, 'random_state': \
+                self.random_state}
 
     def _setup(self, X):
         self.t = 1

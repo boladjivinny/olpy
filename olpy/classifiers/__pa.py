@@ -60,6 +60,10 @@ class PA(OnlineLearningModel):
         """
         return loss / s_t if s_t > 0 else 1
 
+    def get_params(self, deep=True):
+        return {'num_iterations': self.num_iterations, \
+            'random_state': self.random_state}
+
 
 class PA_I(PA):
     name = "Passive-Aggressive-I"
@@ -95,8 +99,9 @@ class PA_I(PA):
     def _get_gamma(self, loss, s):
         return min(self.C, loss / s)
 
-    def get_params(self):
-        return {'C': self.C, 'num_iterations': self.num_iterations}
+    def get_params(self, deep=True):
+        return {'C': self.C, 'num_iterations': self.num_iterations, \
+            'random_state': self.random_state}
 
 
 class PA_II(PA):
@@ -133,5 +138,6 @@ class PA_II(PA):
     def _get_gamma(self, loss, s_t):
         return loss / (s_t + (1/(2 * self.C )))
 
-    def get_params(self):
-        return {'C': self.C, 'num_iterations': self.num_iterations}
+    def get_params(self, deep=True):
+        return {'C': self.C, 'num_iterations': self.num_iterations, \
+            'random_state': self.random_state}

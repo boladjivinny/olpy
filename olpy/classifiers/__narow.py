@@ -17,7 +17,7 @@ class NAROW(OnlineLearningModel):
         Parameters
         ----------
         a   : float, default 1
-            AROW's parameter, a > 0
+            NAROW's parameter, a > 0
         num_iterations: int
             Represents the number of iterations to run the algorithm.
         random_state:   int, default None
@@ -50,5 +50,6 @@ class NAROW(OnlineLearningModel):
     def _setup(self, X: np.ndarray):
         self.sigma = np.identity(X.shape[1])
 
-    def get_params(self):
-        return {'a': self.a, 'num_iterations': self.num_iterations}
+    def get_params(self, deep=True):
+        return {'a': self.a, 'num_iterations': self.num_iterations, \
+            'random_state': self.random_state}

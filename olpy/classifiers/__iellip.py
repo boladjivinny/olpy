@@ -62,4 +62,4 @@ class IELLIP(OnlineLearningModel):
 
     def get_params(self, deep=True):
         return {'a': self.a, 'b': self.b, 'c': self.c, 'num_iterations':\
-             self.num_iterations}
+             self.num_iterations, 'random_state': self.random_state}

@@ -46,5 +46,6 @@ class AROW(OnlineLearningModel):
     def _setup(self, X: np.ndarray):
         self.sigma = np.identity(X.shape[1])
 
-    def get_params(self):
-        {'r': self.r, 'num_iterations': self.num_iterations}
+    def get_params(self, deep=True):
+        {'r': self.r, 'num_iterations': self.num_iterations, \
+            'random_state': self.random_state}

@@ -5,8 +5,9 @@ import os
 import pandas as pd
 import numpy as np
 
-from sklearn.metrics import accuracy_score, roc_auc_score, recall_score, f1_score, confusion_matrix
+from sklearn.metrics import accuracy_score, roc_auc_score, recall_score, f1_score, confusion_matrix, make_scorer
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import GridSearchCV
 from olpy.classifiers import *
 
 def print_models():
@@ -85,38 +86,85 @@ if __name__ == '__main__':
     
     # Create a variable to store the model objects
     models_ = []
+    params_ = []
+    
     for model in set(models):
         model = model.lower()
         if model == 'alma':
             models_.append(ALMA(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'C': [2 ** i for i in range(-4, 5)],
+                'B': list(np.arange(0.1, 1, 0.1)),
+                'p': range(2, 12, 2),
+                'alpha': list(np.arange(0.50, 1, 0.05))
+            })
         if model == 'arow':
             models_.append(AROW(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'r': [2 ** i for i in range(-4, 5)]
+            })
         if model == 'cw':
             models_.append(CW(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'a': list(np.arange(0.1, 1, 0.1)),
+                'eta': list(np.arange(0.50, 1, 0.05))
+            })
         if model == 'scw':
             models_.append(SCW(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'C': [2 ** i for i in range(-4, 5)],
+                'eta': list(np.arange(0.50, 1, 0.05))
+            })
         if model == 'iellip':
             models_.append(IELLIP(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'a': list(np.arange(0.1, 1.1, 0.1)),
+                'b': list(np.arange(0.1, 1.1, 0.1)),
+                'c': list(np.arange(0.1, 1.1, 0.1))
+            })
         if model == 'narow':
             models_.append(NAROW(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'a': list(np.arange(0.1, 1.1, 0.1)),
+            })
         if model == 'nherd':
             models_.append(NHerd(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'a': list(np.arange(0.1, 1.1, 0.1)),
+                'C': [2 ** i for i in range(-4, 5)]
+            })
         if model == 'ogd':
             models_.append(OGD(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'C': [2 ** i for i in range(-4, 5)]
+            })
         if model == 'pa':
             models_.append(PA(random_state=seed, num_iterations=n_iterations))
+            params_.append({})
         if model == 'pa1':
             models_.append(PA_I(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'C': [2 ** i for i in range(-4, 5)]            
+            })
         if model == 'pa2':
             models_.append(PA_II(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'C': [2 ** i for i in range(-4, 5)]            
+            })
         if model == 'perceptron':
             models_.append(Perceptron(random_state=seed, num_iterations=n_iterations))
+            params_.append({})
         if model == 'sop':
             models_.append(SecondOrderPerceptron(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'a': list(np.arange(0.1, 1.1, 0.1))
+            })
         if model == 'romma':
             models_.append(ROMMA(random_state=seed, num_iterations=n_iterations))
+            params_.append({})
         if model == 'aromma':
             models_.append(aROMMA(random_state=seed, num_iterations=n_iterations))
+            params_.append({})
 
     # Load the datasets
     scaler = MinMaxScaler()
@@ -144,16 +192,18 @@ if __name__ == '__main__':
         print()
 
     i = 0
+    best_params_record = "Best params: \n"
     for model in models_:
+        clf = GridSearchCV(model, params_[i], refit='recall', n_jobs=-1)
         training_start = time.time()
         # Try, catch to avoid errors stopping the program
         try:
-            model.fit(X_train, Y_train, verbose=False)
+            clf.fit(X_train, Y_train, verbose=False)
             duration = time.time() - training_start
 
-            scores = model.decision_function(X_test)
+            scores = clf.decision_function(X_test)
             test_start = time.time()
-            preds = model.predict(X_test)
+            preds = clf.predict(X_test)
             preds_duration = time.time() - test_start
 
             acc = accuracy_score(Y_test, preds)
@@ -163,6 +213,7 @@ if __name__ == '__main__':
 
             roc = roc_auc_score(Y_test, scores)
             
+            best_params_record += model.name + "\n" + str(clf.best_params_) + "\n\n"
 
             if verbose:
                 print("%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" % (list(set(models))[i], 1000*duration, \
@@ -180,4 +231,7 @@ if __name__ == '__main__':
         except Exception as e:
             print(model.name, "- Failed\n", e)
         i = i + 1
+    print()
+    print()
+    print(best_params_record)
     summary.to_csv(output_file, index=False)

@@ -82,5 +82,6 @@ class SecondOrderPerceptron(Perceptron):
 
         self.sigma = sigma_t
 
-    def get_params(self):
-        return {'a': self.a, 'num_iterations': self.num_iterations}
+    def get_params(self, deep=True):
+        return {'a': self.a, 'num_iterations': self.num_iterations, \
+            'random_state': self.random_state}

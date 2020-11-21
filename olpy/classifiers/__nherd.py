@@ -56,4 +56,4 @@ class NHerd(OnlineLearningModel):
 
     def get_params(self, deep=True):
         return {'a': self.a, 'C': self.C, 'num_iterations':\
-             self.num_iterations}
+             self.num_iterations, 'random_state': self.random_state}
