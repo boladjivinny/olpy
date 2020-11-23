@@ -1,6 +1,7 @@
 import argparse
 import time
 import os
+import joblib
 
 import pandas as pd
 import numpy as np
@@ -9,6 +10,20 @@ from sklearn.metrics import accuracy_score, roc_auc_score, recall_score, f1_scor
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from olpy.classifiers import *
+
+
+class FullPaths(argparse.Action):
+    """Expand user- and relative-paths"""
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, os.path.abspath(os.path.expanduser(values)))
+
+def is_dir(dirname):
+    """Checks if a path is an actual directory"""
+    if not os.path.isdir(dirname):
+        msg = "{0} is not a directory".format(dirname)
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return dirname
 
 def print_models():
     models = {
@@ -66,6 +81,13 @@ parser.add_argument('-o', type=str, default='experiment-results.csv',\
 parser.add_argument('-b', '--bias', help="Whether or not a bias should be"+\
                         "used.", action="store_true")
 
+parser.add_argument('-d', '--dump', help="Whether or not a bthe models"+\
+                        "should be dumped.", action="store_true")
+
+parser.add_argument('--dump-dir', action=FullPaths, type=is_dir, default='.',\
+                    help="Output directory for dumping the models."\
+                        '(default: %(default)s)')
+
 parser.add_argument('--cv', help="Whether or not hyperparamter through"+\
                         "cross validation should be done.", action="store_true")
 
@@ -86,6 +108,8 @@ if __name__ == '__main__':
     label = args.label
     bias = args.bias 
     cv = args.cv
+    dump = args.dump
+    model_dir = args.dump_dir
 
     # First we replace all by the list of available models
     if models == '--all' or '--all' in models:
@@ -249,6 +273,11 @@ if __name__ == '__main__':
             summary.loc[i, 'TN'] = tn
             summary.loc[i, 'FP'] = fp
             summary.loc[i, 'FN'] = fn
+
+            if dump:
+                # Save the model
+                joblib.dump(model_, model_dir + '/' + list(set(models))[i] + '.dump')
+
         except Exception as e:
             print(model.name, "- Failed\n", e)
         i = i + 1
