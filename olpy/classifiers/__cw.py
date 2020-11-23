@@ -21,7 +21,7 @@ class CW(OnlineLearningModel):
         a   : float, default 1
             Initial variance parameter, a > 0
         eta : float, default=0.7
-            Value to which the inverse gaussian PDF is applied
+            Mean weight value.
         num_iterations: int
             Represents the number of iterations to run the algorithm.
         random_state:   int, default None
@@ -85,7 +85,7 @@ class SCW(CW):
         C   : float, default 1
             SCW parameter, C > 0
         eta : float, default=0.7
-            Value to which the inverse gaussian PDF is applied
+            Mean weight value.
         num_iterations: int
             Represents the number of iterations to run the algorithm.
         random_state:   int, default None
@@ -109,4 +109,56 @@ class SCW(CW):
 
     def get_params(self, deep=True):
         return {'C': self.C, 'eta': self.eta, 'num_iterations': \
+            self.num_iterations, 'random_state': self.random_state}
+
+
+
+class SCW2(SCW):
+    name = "Soft Confidence Weighted (version 2)"
+    
+    def _get_alpha(self, m_t, v_t):
+        n_t = v_t + 1/(2*self.C)
+        return max(0, (-(2 * m_t * n_t + self.phi ** 2 * m_t * v_t) + \
+            math.sqrt(self.phi ** 4 * m_t ** 2 * v_t * 2 + 4 * n_t * v_t * \
+                self.phi ** 2 * (n_t + v_t * self.phi * 2)))/(2 * (n_t ** 2 + n_t * v_t * self.phi ** 2)))
+
+class ECCW(CW):
+    name = "Exact Convex Confidence-Weighted Learning"
+
+    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None, positive_label=1):
+        """
+        Instantiate a Confidence Weighted model for training.
+        
+        Crammer, K.; Dredze, M. & Pereira, F.
+        Koller, D.; Schuurmans, D.; Bengio, Y. & Bottou, L. (Eds.)
+        Exact convex confidence-weighted learning 
+        Advances in Neural Information Processing Systems, 
+        Curran Associates, Inc., 2009, 21, 345-352
+
+        Parameters
+        ----------
+        a   : float, default 1
+            Initial variance parameter, a > 0
+        eta : float, default=0.7
+            Mean weight value. 0.5 <= mu <= 1
+        num_iterations: int
+            Represents the number of iterations to run the algorithm.
+        random_state:   int, default None
+            Seed for the pseudorandom generator
+        positive_label: 1 or -1
+            Represents the value that is used as positive_label.
+
+        Returns
+        -------
+        None
+        """
+        super().__init__(eta=eta, a=a, num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+
+    def _get_alpha(self, m_t, v_t):
+        return max(0, (1/(v_t * self.xi)) * (-m_t * self.psi + \
+            math.sqrt(m_t **2 * self.phi/4 + v_t * self.phi**2 * self.psi)))
+
+
+    def get_params(self, deep=True):
+        return {'a': self.a, 'eta': self.eta, 'num_iterations': \
             self.num_iterations, 'random_state': self.random_state}

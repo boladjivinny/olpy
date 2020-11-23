@@ -16,6 +16,7 @@ def print_models():
         'arow'  : 'Adaptive regularization of weight vectors (AROW)',
         'cw'    : 'Confidence Weighted',
         'scw'   : 'Soft Confidence Weighted',
+        'scw2'   : 'Soft Confidence Weighted (version 2)',
         'iellip': 'Improved Ellipsoid',
         'narow' : 'New adaptive algorithms for online classification',
         'nherd' : 'Normal Herd',
@@ -62,9 +63,14 @@ parser.add_argument('-s', type=int, default=None, help='the random seed\
 parser.add_argument('-o', type=str, default='experiment-results.csv',\
                         help='file to which the reports would be saved\
                         (default: %(default)s)')
+parser.add_argument('-b', '--bias', help="Whether or not a bias should be"+\
+                        "used.", action="store_true")
+
+parser.add_argument('--cv', help="Whether or not hyperparamter through"+\
+                        "cross validation should be done.", action="store_true")
+
 parser.add_argument('-v', '--verbose', help='whether the program should\
-                            have a verbose output or not', action='count'\
-                                , default=0)
+                            have a verbose output or not', action="store_true")
 
 
 if __name__ == '__main__':
@@ -72,16 +78,18 @@ if __name__ == '__main__':
     # Collect the arguments
     train_file = args.train_set[0]
     test_file = args.test_set[0]
-    verbose = args.verbose > 0
+    verbose = args.verbose
     output_file = args.o
     seed = args.s
     models = args.models
     n_iterations = args.n
     label = args.label
+    bias = args.bias 
+    cv = args.cv
 
     # First we replace all by the list of available models
     if models == '--all' or '--all' in models:
-        models = ['alma', 'arow', 'cw', 'scw', 'iellip', 'narow', 'nherd',
+        models = ['alma', 'arow', 'cw', 'scw', 'scw2', 'iellip', 'narow', 'nherd',
                      'ogd', 'pa', 'pa1', 'pa2', 'perceptron', 'sop', 'romma', 'aromma']
     
     # Create a variable to store the model objects
@@ -111,6 +119,12 @@ if __name__ == '__main__':
             })
         if model == 'scw':
             models_.append(SCW(random_state=seed, num_iterations=n_iterations))
+            params_.append({
+                'C': [2 ** i for i in range(-4, 5)],
+                'eta': list(np.arange(0.50, 1, 0.05))
+            })
+        if model == 'scw2':
+            models_.append(SCW2(random_state=seed, num_iterations=n_iterations))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)],
                 'eta': list(np.arange(0.50, 1, 0.05))
@@ -171,6 +185,10 @@ if __name__ == '__main__':
     train_data = pd.read_csv(train_file)
     test_data = pd.read_csv(test_file)
 
+    if bias:
+        train_data.insert(0, 'Bias', np.ones(train_data.shape[0]))
+        test_data.insert(0, 'Bias', np.ones(test_data.shape[0]))
+
     Y_train = train_data.loc[:, label].to_numpy()
     X_train = scaler.fit_transform(train_data.drop(columns=[label]))
 
@@ -194,16 +212,18 @@ if __name__ == '__main__':
     i = 0
     best_params_record = "Best params: \n"
     for model in models_:
-        clf = GridSearchCV(model, params_[i], refit='recall', n_jobs=-1)
+        model_ = model
+        if cv:
+            model_ = GridSearchCV(model, params_[i], refit='recall', n_jobs=-1)
         training_start = time.time()
         # Try, catch to avoid errors stopping the program
         try:
-            clf.fit(X_train, Y_train, verbose=False)
+            model_.fit(X_train, Y_train, verbose=False)
             duration = time.time() - training_start
 
-            scores = clf.decision_function(X_test)
+            scores = model_.decision_function(X_test)
             test_start = time.time()
-            preds = clf.predict(X_test)
+            preds = model_.predict(X_test)
             preds_duration = time.time() - test_start
 
             acc = accuracy_score(Y_test, preds)
@@ -213,7 +233,8 @@ if __name__ == '__main__':
 
             roc = roc_auc_score(Y_test, scores)
             
-            best_params_record += model.name + "\n" + str(clf.best_params_) + "\n\n"
+            if cv:
+                best_params_record += model.name + "\n" + str(model_.best_params_) + "\n\n"
 
             if verbose:
                 print("%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" % (list(set(models))[i], 1000*duration, \
@@ -231,7 +252,9 @@ if __name__ == '__main__':
         except Exception as e:
             print(model.name, "- Failed\n", e)
         i = i + 1
-    print()
-    print()
-    print(best_params_record)
-    summary.to_csv(output_file, index=False)
+    if cv:
+        print()
+        print()
+        print(best_params_record)
+    if output_file:
+        summary.to_csv(output_file, index=False)

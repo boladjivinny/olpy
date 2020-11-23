@@ -5,9 +5,9 @@ from .__pa import PA, PA_I, PA_II
 from .__perceptron import Perceptron, SecondOrderPerceptron
 from .__alma import ALMA
 from .__arow import AROW
-from .__cw import CW, SCW
+from .__cw import CW, SCW, SCW2
 from .__narow import NAROW
-from .__romma import ROMMA, aROMMA
+from .__romma import ROMMA, aROMMA 
 
 all(
     [
@@ -23,6 +23,7 @@ all(
         AROW,
         CW,
         SCW,
+        SCW2,
         NAROW,
         ROMMA,
         aROMMA
