@@ -39,11 +39,11 @@ class PA(OnlineLearningModel):
 
     def _update(self, x: np.ndarray, y: int):
         decision = self.weights.dot(x)
-        loss = max(0, 1 - y * decision) * self.class_weight_[y]
+        loss = max(0, 1 - y * decision)
         if loss > 0:
             sq_norm = LA.norm(x) ** 2
             gamma = self._get_gamma(loss, sq_norm)
-            self.weights = self.weights + gamma * y * x
+            self.weights = self.weights + gamma * y * x * self.class_weight_[y]
 
     def _get_gamma(self, loss, s_t):
         """

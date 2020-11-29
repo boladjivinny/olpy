@@ -33,13 +33,13 @@ class Perceptron(OnlineLearningModel):
     def _update(self, x: np.ndarray, y: int):
         prediction = np.sign(self.weights.dot(x))
         if y != prediction:
-            self.weights = self.weights + y * x
+            self.weights = self.weights + y * x * self.class_weight_[y]
 
 
 class SecondOrderPerceptron(Perceptron):
     name = "Second Order Perceptron"
     
-    def __init__(self, a=0.7, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, a=1, num_iterations=20, random_state=None, positive_label=1):
         """
         Instantiate a Second Order Perceptron instance for training.
 
@@ -71,15 +71,13 @@ class SecondOrderPerceptron(Perceptron):
     def _update(self, x: np.ndarray, y: int):
         x_ = np.expand_dims(x, axis=0)
         s_t = x_ @ self.sigma.T
-        v_t = x_ @ s_t.T
+        v_t = x @ s_t.T
         beta_t = 1/(v_t + 1)
         sigma_t = self.sigma - beta_t * (s_t.T @ s_t)
         f_t = self.weights @ sigma_t @ x_.T
 
-        hat_y_t = 1 if f_t >= 0 else 0
-        if hat_y_t != y:
-            self.weights = self.weights + y * x
-
+        if np.sign(f_t) != y:
+            self.weights = self.weights + y * x * self.class_weight_[y]
         self.sigma = sigma_t
 
     def get_params(self, deep=True):

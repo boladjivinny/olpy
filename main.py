@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 from olpy.classifiers import *
-from sklearn.metrics import accuracy_score, roc_auc_score, recall_score, f1_score, confusion_matrix
+from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, confusion_matrix
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils.class_weight import compute_class_weight
@@ -239,8 +239,8 @@ if __name__ == '__main__':
     summary.insert(0, 'Model', [model.name for model in models_])
 
     if verbose:
-        print("%9s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s" %
-              ('algorithm', 'train time (s)', 'test time (s)', 'accuracy', 'f1-score', 'recall', 'roc-auc',
+        print("%9s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s" %
+              ('algorithm', 'train time (s)', 'test time (s)', 'accuracy', 'f1-score', 'roc-auc',
                'true positive', 'true negative', 'false positive', 'false negative'))
         print()
 
@@ -265,7 +265,6 @@ if __name__ == '__main__':
 
             acc = accuracy_score(Y_test, preds)
             f1 = f1_score(Y_test, preds)
-            recall = recall_score(Y_test, preds)
             tn, fp, fn, tp = confusion_matrix(Y_test, preds, normalize='true').ravel()
 
             # ROC would not compute if for instance we have only one class in the test dataset.
@@ -279,15 +278,14 @@ if __name__ == '__main__':
                 best_params_record += model.name + "\n" + str(model_.best_params_) + "\n\n"
 
             if verbose:
-                print("%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" %
-                      (list(set(models))[i], 1000 * duration, 1000 * preds_duration, acc, f1, recall,
+                print("%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" %
+                      (list(set(models))[i], 1000 * duration, 1000 * preds_duration, acc, f1,
                        roc, tp, tn, fp, fn))
 
             summary.loc[i, 'Training-Time'] = duration
             summary.loc[i, 'Prediction-Time'] = preds_duration
             summary.loc[i, 'Accuracy'] = acc
             summary.loc[i, 'F1-Score'] = f1
-            summary.loc[i, 'Recall'] = recall
             summary.loc[i, 'ROC_AUC-Score'] = roc
             summary.loc[i, 'TP'] = tp
             summary.loc[i, 'TN'] = tn

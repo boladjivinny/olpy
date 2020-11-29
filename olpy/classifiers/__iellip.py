@@ -50,11 +50,13 @@ class IELLIP(OnlineLearningModel):
     def _update(self, x, y):
         decision = self.weights.dot(x)
         prediction = np.sign(decision)
-        v = (x @ self.sigma @ x.T) * self.class_weight_[y]
+        v = (x @ self.sigma @ x.T)
         m = y * decision
         if prediction != y:
             if v != 0:
-                alpha = (1 - m) / math.sqrt(v)
+                # For a given class, we want alpha to be proportional to
+                # the class weight.
+                alpha = self.class_weight_[y] * (1 - m) / math.sqrt(v)
                 g = y * x / math.sqrt(v)
                 # Added an axis to avoid errors
                 sigma = np.expand_dims(g @ self.sigma.T, axis=0)

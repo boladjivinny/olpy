@@ -50,7 +50,7 @@ class OGD(OnlineLearningModel):
     def _update(self, x: np.ndarray, y: int):
         decision = self.weights.dot(x)
         prediction = np.sign(decision)
-        C = self.C / math.sqrt(self.t)
+        c = self.C / math.sqrt(self.t)
 
         # Changed the parameters to call the loss function as it seems they
         # expect at least two values
@@ -59,14 +59,14 @@ class OGD(OnlineLearningModel):
         else:
             loss = self.loss_function([y], [prediction])
 
-        loss *= self.class_weight_[y]
         if loss > 0:
             if self.loss_function == log_loss:
-                self.weights = self.weights + C * y * x * (1 / (1 + math.exp(y * decision)))
+                self.weights = self.weights + c * y * x * (1 / (1 + math.exp(y * decision))) * \
+                               self.class_weight_[y]
             elif self.loss_function == mean_squared_error:
-                self.weights = self.weights - C * (decision - y) * x
+                self.weights = self.weights - c * (decision - y) * x * self.class_weight_[y]
             else:
-                self.weights = self.weights + C * y * x
+                self.weights = self.weights + c * y * x
 
         self.t += 1
 

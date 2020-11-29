@@ -46,7 +46,7 @@ class ROMMA(OnlineLearningModel):
                 if deno != 0:
                     coe_1 = ((LA.norm(x) * LA.norm(self.weights)) ** 2 - y * f_t) / deno
                     coe_2 = (LA.norm(self.weights) ** 2 * (y - f_t)) / deno
-                    self.weights = coe_1 * self.weights + coe_2 * x
+                    self.weights = (coe_1 * self.weights + coe_2 * x) * self.class_weight_[y]
 
     def _is_mistake(self, x: np.ndarray, y: int):
         """

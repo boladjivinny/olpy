@@ -47,9 +47,10 @@ class CW(OnlineLearningModel):
         decision = self.weights.dot(x)
         v_t = x @ np.diag(np.diag(self.sigma)) @ x.T
         m_t = y * decision
-        loss = (self.phi * math.sqrt(v_t) - m_t) * self.class_weight_[y]
+        loss = (self.phi * math.sqrt(v_t) - m_t)
         if loss > 0:
-            alpha_t = self._get_alpha(m_t, v_t)
+            # We scale our learning rate (alpha) using the weight/cost
+            alpha_t = self.class_weight_[y] * self._get_alpha(m_t, v_t)
             u_t = 0.25 * (-alpha_t * v_t * self.phi + math.sqrt(
                 alpha_t ** 2 * v_t ** 2 * self.phi ** 2 + 4 * v_t)) ** 2
             beta_t = alpha_t * self.phi / (math.sqrt(u_t) +
@@ -59,7 +60,7 @@ class CW(OnlineLearningModel):
             self.sigma -= beta_t * sigma.T @ sigma
 
     def _get_alpha(self, m_t, v_t):
-        """Computes the alpha for the CW/SCW algorithm"""
+        """Computes the alpha for the CW/SCW algorithms"""
         return max(0, (-m_t * self.psi + math.sqrt((m_t ** 2 *
                                                     self.phi ** 4) / 4 + v_t * self.phi ** 2 *
                                                    self.xi)) / (v_t * self.xi))

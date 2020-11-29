@@ -48,10 +48,12 @@ class NHerd(OnlineLearningModel):
         decision = self.weights.dot(x)
         v = x @ self.sigma @ x.T
         m = y * decision
-        loss = (1 - m) * self.class_weight_[y]
+        loss = (1 - m)
         if loss > 0:
             beta = 1 / (v + 1/self.C)
-            alpha = max(0, 1 - m) * beta
+            # Scale using the class weights. The higher the weight, higher the
+            # alpha.
+            alpha = max(0, 1 - m) * beta * self.class_weight_[y]
             sigma = np.expand_dims(x @ self.sigma.T, axis=0)
             self.weights = self.weights + alpha * y * np.squeeze(sigma)
             self.sigma = self.sigma - (beta ** 2) * (v + 2 * (1/self.C)) * sigma.T @ sigma

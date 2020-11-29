@@ -42,7 +42,7 @@ class AROW(OnlineLearningModel):
         v_t = x @ self.sigma @ x.T
         loss = max(0, 1 - f_t * y) * self.class_weight_[y]
         if loss > 0:
-            beta_t = 1 / (v_t + self.r)
+            beta_t = (1 / (v_t + self.r)) * self.class_weight_[y]
             alpha_t = loss * beta_t
             sigma = np.expand_dims(x @ self.sigma.T, axis=0)
             self.weights += alpha_t * y * np.squeeze(sigma)
