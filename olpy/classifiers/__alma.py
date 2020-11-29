@@ -8,11 +8,11 @@ from olpy import OnlineLearningModel
 
 class ALMA(OnlineLearningModel):
     name = "ALMA"
-    
-    def __init__(self, alpha=1.0, p=2, B=1, C=1, num_iterations=20, random_state=None,\
-                        class_weight=None, positive_label=1):
-        super().__init__(num_iterations=num_iterations, random_state=random_state, \
-            positive_label=positive_label, class_weight=class_weight)
+
+    def __init__(self, alpha=1.0, p=2, B=1, C=1, num_iterations=20, random_state=None,
+                 class_weight=None, positive_label=1):
+        super().__init__(num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
         """
         Instantiate an ALMA model for training.
 
@@ -46,7 +46,7 @@ class ALMA(OnlineLearningModel):
         self.B = B
         self.C = C
         self.alpha = alpha
-        
+
         self.k = 0
 
     def _update(self, x: np.ndarray, y: int):
@@ -57,7 +57,7 @@ class ALMA(OnlineLearningModel):
             norm_w = LA.norm(self.weights, ord=self.p)
             self.weights = self.weights / (max(1, norm_w))
             self.k += 1
-    
+
     def _setup(self, X):
         self.k = 1
 

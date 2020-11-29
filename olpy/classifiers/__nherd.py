@@ -6,8 +6,8 @@ from olpy import OnlineLearningModel
 class NHerd(OnlineLearningModel):
     name = "Normal Herd"
     
-    def __init__(self, a=1, C=1, num_iterations=20, random_state=None, \
-                    positive_label=1, class_weight=None):
+    def __init__(self, a=1, C=1, num_iterations=20, random_state=None,
+                 positive_label=1, class_weight=None):
         """
         Instantiate an Normal Herd model for training.
 
@@ -38,8 +38,8 @@ class NHerd(OnlineLearningModel):
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, \
-            positive_label=positive_label, class_weight=class_weight)
+        super().__init__(num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
         self.a = a
         self.C = C
         self.sigma = None

@@ -7,8 +7,8 @@ from olpy._model import OnlineLearningModel
 class ROMMA(OnlineLearningModel):
     name = "ROMMA"
     
-    def __init__(self, num_iterations=20, random_state=None, positive_label=1,\
-                    class_weight=None):
+    def __init__(self, num_iterations=20, random_state=None, positive_label=1,
+                 class_weight=None):
         """
         Instantiate a ROMMA model for training.
 
@@ -33,8 +33,8 @@ class ROMMA(OnlineLearningModel):
         None
         """
 
-        super().__init__(num_iterations=num_iterations, random_state=random_state, \
-                            positive_label=positive_label, class_weight=class_weight)
+        super().__init__(num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
 
     def _update(self, x: np.ndarray, y: int):
         f_t = self.weights.dot(x)
@@ -69,6 +69,7 @@ class ROMMA(OnlineLearningModel):
 
 class aROMMA(ROMMA):
     name = "Aggressive ROMMA"
+
     def _is_mistake(self, x: np.ndarray, y: int):
         f_t = self.weights.dot(x)
         l_t = 1 - y * f_t

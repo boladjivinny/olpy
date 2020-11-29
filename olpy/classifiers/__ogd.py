@@ -8,8 +8,8 @@ from olpy import OnlineLearningModel
 class OGD(OnlineLearningModel):
     name = "Online Gradient Descent"
     
-    def __init__(self, C=1, loss_function=zero_one_loss, num_iterations=20, \
-                    random_state=None, positive_label=1, class_weight=None):
+    def __init__(self, C=1, loss_function=zero_one_loss, num_iterations=20,
+                 random_state=None, positive_label=1, class_weight=None):
         """
         Instantiate an Online Gradient Descent model for training.
 
@@ -41,8 +41,8 @@ class OGD(OnlineLearningModel):
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, \
-                            positive_label=positive_label, class_weight=class_weight)
+        super().__init__(num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
         self.C = C
         self.loss_function = loss_function
         self.t = 0

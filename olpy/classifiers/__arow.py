@@ -5,8 +5,8 @@ from olpy._model import OnlineLearningModel
 class AROW(OnlineLearningModel):
     name = "AROW"
     
-    def __init__(self, r=1, num_iterations=20, random_state=None, \
-                    positive_label=1, class_weight=None):
+    def __init__(self, r=1, num_iterations=20, random_state=None,
+                 positive_label=1, class_weight=None):
         """
         Instantiate an AROW model for training.
         
@@ -32,8 +32,8 @@ class AROW(OnlineLearningModel):
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, \
-                            positive_label=positive_label, class_weight=class_weight)
+        super().__init__(num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
         self.r = r
         self.sigma = None
 

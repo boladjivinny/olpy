@@ -7,8 +7,8 @@ from olpy import OnlineLearningModel
 class IELLIP(OnlineLearningModel):
     name = "Improved Ellipsoid"
     
-    def __init__(self, a=1, b=0.3, c=0.1, num_iterations=20, \
-                random_state=None, positive_label=1, class_weight=None):
+    def __init__(self, a=1, b=0.3, c=0.1, num_iterations=20,
+                 random_state=None, positive_label=1, class_weight=None):
         """
         Instantiate an IELLIP model for training.
 
@@ -40,8 +40,8 @@ class IELLIP(OnlineLearningModel):
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, \
-                            positive_label=positive_label, class_weight=class_weight)
+        super().__init__(num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
         self.a = a
         self.b = b
         self.c = c

@@ -5,7 +5,8 @@ import numpy as np
 
 from olpy.preprocessing import LabelEncoder
 
-class OnlineLearningModel():
+
+class OnlineLearningModel:
     """Base class for the online learning models."""
 
     def __init__(self, num_iterations=20, random_state=None, positive_label=1, class_weight=None):
@@ -28,6 +29,8 @@ class OnlineLearningModel():
         self.weights = None
         self.labels = None
         self.num_iterations = num_iterations
+        # Safe check to avoid having the same label as positive and negative
+        assert positive_label != -1
         self.positive_label = positive_label
         self.random_state = random_state
         self.class_weight = class_weight
@@ -56,13 +59,13 @@ class OnlineLearningModel():
         positive_label = kwargs.get('positive_label', 1)
 
         self.weights = np.zeros(X.shape[1])
-        y_transformed, self.labels = LabelEncoder(positive_label=self.positive_label)\
-                                            .fit_transform(Y, return_labels=True)
-        # We have the weights, with the initial encoding {0:0.3, 1:0.7}
+        y_transformed, self.labels = LabelEncoder(positive_label=self.positive_label) \
+            .fit_transform(Y, return_labels=True)
         if self.class_weight is not None:
+            weights = self.class_weight / sum(self.class_weight)
             self.class_weight_ = {
-                -1: self.class_weight[self.labels[0]],
-                self.positive_label: self.class_weight[positive_label],
+                -1: weights[self.labels[0]],
+                1: weights[positive_label],
             }
         # Balanced set
         else:
@@ -70,11 +73,10 @@ class OnlineLearningModel():
                 -1: 1,
                 1: 1
             }
-
         random.seed(self.random_state)
         self._setup(X)
-        
-        for iteration in range(1, self.num_iterations+1):
+
+        for iteration in range(1, self.num_iterations + 1):
             start = time.time()
             idx = random.sample(range(X.shape[0]), k=X.shape[0])
 
@@ -83,9 +85,9 @@ class OnlineLearningModel():
 
             if verbose:
                 prediction = self.predict(X)
-                print('Iteration ({}/{}) \tRuntime: {}s \tAccuracy:  {}/{}'.\
-                    format(iteration, self.num_iterations, time.time() - start, \
-                    np.count_nonzero(prediction==Y), X.shape[0]))
+                print('Iteration ({}/{}) \tRuntime: {}s \tAccuracy:  {}/{}'.
+                      format(iteration, self.num_iterations, time.time() - start,
+                             np.count_nonzero(prediction == Y), X.shape[0]))
         return self
 
     def _update(self, x: np.ndarray, y: int):
@@ -111,8 +113,6 @@ class OnlineLearningModel():
         ----------
         X   : array or np.ndarray
             Input variable with dimension (n, m)
-        Y   : array or np.ndarray
-            Output variable with binary labels.
         """
         return NotImplemented
 
@@ -155,8 +155,6 @@ class OnlineLearningModel():
         ----------
         X   : array or np.ndarray
             Input variable with dimension (n, m)
-        y   : array or np.ndarray
-            Output variable with dimension (n, )
         Returns
         -------
         float: Score of the model. Default is the accuracy score.
@@ -165,14 +163,13 @@ class OnlineLearningModel():
 
     def get_params(self, deep=True):
         """
-        Compute the score performed on the dataset.
+        Returns the parameters that can be evaluated
+        during a cross-validation (eg. GridSearchCV search)
 
         Parameters
         ----------
-        X   : array or np.ndarray
-            Input variable with dimension (n, m)
-        y   : array or np.ndarray
-            Output variable with dimension (n, )
+        deep: cf. scikit-learn's official documentation
+
         Returns
         -------
         float: Score of the model. Default is the accuracy score.

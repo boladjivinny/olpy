@@ -5,8 +5,8 @@ from olpy._model import OnlineLearningModel
 class NAROW(OnlineLearningModel):
     name = "NAROW"
     
-    def __init__(self, a=1, num_iterations=20, random_state=None, \
-                    positive_label=1, class_weight=None):
+    def __init__(self, a=1, num_iterations=20, random_state=None,
+                 positive_label=1, class_weight=None):
         """
         Instantiate a new NAROW model for training.
         
@@ -33,8 +33,8 @@ class NAROW(OnlineLearningModel):
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, \
-                            positive_label=positive_label, class_weight=class_weight)
+        super().__init__(num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
         self.a = a
 
     def _update(self, x: np.ndarray, y: int):

@@ -7,8 +7,9 @@ from olpy._model import OnlineLearningModel
 
 class CW(OnlineLearningModel):
     name = "Confidence-Weighted"
-    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None, \
-                    positive_label=1, class_weight=None):
+
+    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None,
+                 positive_label=1, class_weight=None):
         """
         Instantiate a Confidence Weighted model for training.
         
@@ -37,8 +38,8 @@ class CW(OnlineLearningModel):
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, \
-                            positive_label=positive_label, class_weight=class_weight)
+        super().__init__(num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
         self.a = a
         self.eta = eta
 
@@ -81,8 +82,8 @@ class CW(OnlineLearningModel):
 class SCW(CW):
     name = "Soft Confidence-Weighted"
 
-    def __init__(self, eta=0.7, C=1, num_iterations=20, random_state=None, \
-                    positive_label=1, class_weight=None):
+    def __init__(self, eta=0.7, C=1, num_iterations=20, random_state=None,
+                 positive_label=1, class_weight=None):
         """
         Instantiate a SOft Confidence Weighted model for training.
         
@@ -110,8 +111,9 @@ class SCW(CW):
         -------
         None
         """
-        super().__init__(eta=eta, a=1, num_iterations=num_iterations,\
-             random_state=random_state, positive_label=positive_label, class_weight=class_weight)
+        super().__init__(eta=eta, a=1, num_iterations=num_iterations,
+                         random_state=random_state, positive_label=positive_label,
+                         class_weight=class_weight)
         self.C = C
 
     def _get_alpha(self, m_t, v_t):
@@ -130,21 +132,22 @@ class SCW(CW):
         return params
 
 
-
 class SCW2(SCW):
     name = "Soft Confidence Weighted (version 2)"
-    
+
     def _get_alpha(self, m_t, v_t):
-        n_t = v_t + 1/(2*self.C)
-        return max(0, (-(2 * m_t * n_t + self.phi ** 2 * m_t * v_t) + \
-            math.sqrt(self.phi ** 4 * m_t ** 2 * v_t * 2 + 4 * n_t * v_t * \
-                self.phi ** 2 * (n_t + v_t * self.phi * 2)))/(2 * (n_t ** 2 + n_t * v_t * self.phi ** 2)))
+        n_t = v_t + 1 / (2 * self.C)
+        return max(0, (-(2 * m_t * n_t + self.phi ** 2 * m_t * v_t) +
+                       math.sqrt(self.phi ** 4 * m_t ** 2 * v_t * 2 + 4 *
+                                 n_t * v_t * self.phi ** 2 * (n_t + v_t * self.phi * 2))) /
+                   (2 * (n_t ** 2 + n_t * v_t * self.phi ** 2)))
+
 
 class ECCW(CW):
     name = "Exact Convex Confidence-Weighted Learning"
 
-    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None,\
-                     positive_label=1, class_weight=None):
+    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None,
+                 positive_label=1, class_weight=None):
         """
         Instantiate a Confidence Weighted model for training.
         
@@ -174,9 +177,9 @@ class ECCW(CW):
         -------
         None
         """
-        super().__init__(eta=eta, a=a, num_iterations=num_iterations, random_state=random_state,\
-             positive_label=positive_label, class_weight=class_weight)
+        super().__init__(eta=eta, a=a, num_iterations=num_iterations, random_state=random_state,
+                         positive_label=positive_label, class_weight=class_weight)
 
     def _get_alpha(self, m_t, v_t):
-        return max(0, (1/(v_t * self.xi)) * (-m_t * self.psi + \
-            math.sqrt(m_t **2 * self.phi/4 + v_t * self.phi**2 * self.psi)))
+        return max(0, (1 / (v_t * self.xi)) * (-m_t * self.psi +
+                                               math.sqrt(m_t ** 2 * self.phi / 4 + v_t * self.phi ** 2 * self.psi)))
