@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, roc_auc_score, recall_score, f1_score, confusion_matrix, make_scorer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
+from sklearn.utils.class_weight import compute_class_weight
 from olpy.classifiers import *
 
 
@@ -111,6 +112,29 @@ if __name__ == '__main__':
     dump = args.dump
     model_dir = args.dump_dir
 
+
+    # Load the datasets
+    scaler = MinMaxScaler()
+    train_data = pd.read_csv(train_file)
+    test_data = pd.read_csv(test_file)
+
+    if bias:
+        train_data.insert(0, 'Bias', np.ones(train_data.shape[0]))
+        test_data.insert(0, 'Bias', np.ones(test_data.shape[0]))
+
+    Y_train = train_data.loc[:, label].to_numpy()
+    #class_weight = compute_class_weight(class_weight='balanced', classes=np.unique(Y_train), y=Y_train)
+    
+    #class_weight /= len(Y_train)
+    class_weight = [1, 1]
+
+    #print(class_weight)
+
+    X_train = scaler.fit_transform(train_data.drop(columns=[label]))
+
+    Y_test = test_data.loc[:, label].to_numpy()
+    X_test = scaler.fit_transform(test_data.drop(columns=[label]))
+
     # First we replace all by the list of available models
     if models == '--all' or '--all' in models:
         models = ['alma', 'arow', 'cw', 'scw', 'scw2', 'iellip', 'narow', 'nherd',
@@ -123,7 +147,7 @@ if __name__ == '__main__':
     for model in set(models):
         model = model.lower()
         if model == 'alma':
-            models_.append(ALMA(random_state=seed, num_iterations=n_iterations))
+            models_.append(ALMA(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)],
                 'B': list(np.arange(0.1, 1, 0.1)),
@@ -131,61 +155,61 @@ if __name__ == '__main__':
                 'alpha': list(np.arange(0.50, 1, 0.05))
             })
         if model == 'arow':
-            models_.append(AROW(random_state=seed, num_iterations=n_iterations))
+            models_.append(AROW(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'r': [2 ** i for i in range(-4, 5)]
             })
         if model == 'cw':
-            models_.append(CW(random_state=seed, num_iterations=n_iterations))
+            models_.append(CW(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'a': list(np.arange(0.1, 1, 0.1)),
                 'eta': list(np.arange(0.50, 1, 0.05))
             })
         if model == 'scw':
-            models_.append(SCW(random_state=seed, num_iterations=n_iterations))
+            models_.append(SCW(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)],
                 'eta': list(np.arange(0.50, 1, 0.05))
             })
         if model == 'scw2':
-            models_.append(SCW2(random_state=seed, num_iterations=n_iterations))
+            models_.append(SCW2(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)],
                 'eta': list(np.arange(0.50, 1, 0.05))
             })
         if model == 'iellip':
-            models_.append(IELLIP(random_state=seed, num_iterations=n_iterations))
+            models_.append(IELLIP(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'a': list(np.arange(0.1, 1.1, 0.1)),
                 'b': list(np.arange(0.1, 1.1, 0.1)),
                 'c': list(np.arange(0.1, 1.1, 0.1))
             })
         if model == 'narow':
-            models_.append(NAROW(random_state=seed, num_iterations=n_iterations))
+            models_.append(NAROW(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'a': list(np.arange(0.1, 1.1, 0.1)),
             })
         if model == 'nherd':
-            models_.append(NHerd(random_state=seed, num_iterations=n_iterations))
+            models_.append(NHerd(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'a': list(np.arange(0.1, 1.1, 0.1)),
                 'C': [2 ** i for i in range(-4, 5)]
             })
         if model == 'ogd':
-            models_.append(OGD(random_state=seed, num_iterations=n_iterations))
+            models_.append(OGD(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)]
             })
         if model == 'pa':
-            models_.append(PA(random_state=seed, num_iterations=n_iterations))
+            models_.append(PA(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({})
         if model == 'pa1':
-            models_.append(PA_I(random_state=seed, num_iterations=n_iterations))
+            models_.append(PA_I(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)]            
             })
         if model == 'pa2':
-            models_.append(PA_II(random_state=seed, num_iterations=n_iterations))
+            models_.append(PA_II(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)]            
             })
@@ -198,26 +222,11 @@ if __name__ == '__main__':
                 'a': list(np.arange(0.1, 1.1, 0.1))
             })
         if model == 'romma':
-            models_.append(ROMMA(random_state=seed, num_iterations=n_iterations))
+            models_.append(ROMMA(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({})
         if model == 'aromma':
-            models_.append(aROMMA(random_state=seed, num_iterations=n_iterations))
+            models_.append(aROMMA(random_state=seed, num_iterations=n_iterations, class_weight=class_weight))
             params_.append({})
-
-    # Load the datasets
-    scaler = MinMaxScaler()
-    train_data = pd.read_csv(train_file)
-    test_data = pd.read_csv(test_file)
-
-    if bias:
-        train_data.insert(0, 'Bias', np.ones(train_data.shape[0]))
-        test_data.insert(0, 'Bias', np.ones(test_data.shape[0]))
-
-    Y_train = train_data.loc[:, label].to_numpy()
-    X_train = scaler.fit_transform(train_data.drop(columns=[label]))
-
-    Y_test = test_data.loc[:, label].to_numpy()
-    X_test = scaler.fit_transform(test_data.drop(columns=[label]))
 
 
     summary = pd.DataFrame(np.zeros((len(models_), 10)), columns=['Training-Time', \
@@ -255,8 +264,11 @@ if __name__ == '__main__':
             recall = recall_score(Y_test, preds)
             tn, fp, fn, tp = confusion_matrix(Y_test, preds, normalize='true').ravel()
 
-            roc = roc_auc_score(Y_test, scores)
-            
+            try:
+                roc = roc_auc_score(Y_test, scores)
+            except:
+                roc = 0
+                
             if cv:
                 best_params_record += model.name + "\n" + str(model_.best_params_) + "\n\n"
 
@@ -279,6 +291,7 @@ if __name__ == '__main__':
                 joblib.dump(model_, model_dir + '/' + list(set(models))[i] + '.dump')
 
         except Exception as e:
+            print(e)
             print(model.name, "- Failed\n", e)
         i = i + 1
     if cv:

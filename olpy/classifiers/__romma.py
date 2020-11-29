@@ -7,7 +7,8 @@ from olpy._model import OnlineLearningModel
 class ROMMA(OnlineLearningModel):
     name = "ROMMA"
     
-    def __init__(self, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, num_iterations=20, random_state=None, positive_label=1,\
+                    class_weight=None):
         """
         Instantiate a ROMMA model for training.
 
@@ -23,13 +24,17 @@ class ROMMA(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
 
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
 
     def _update(self, x: np.ndarray, y: int):
         f_t = self.weights.dot(x)

@@ -7,7 +7,8 @@ from olpy import OnlineLearningModel
 class IELLIP(OnlineLearningModel):
     name = "Improved Ellipsoid"
     
-    def __init__(self, a=1, b=0.3, c=0.1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, a=1, b=0.3, c=0.1, num_iterations=20, \
+                random_state=None, positive_label=1, class_weight=None):
         """
         Instantiate an IELLIP model for training.
 
@@ -31,12 +32,16 @@ class IELLIP(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
         self.a = a
         self.b = b
         self.c = c
@@ -45,7 +50,7 @@ class IELLIP(OnlineLearningModel):
     def _update(self, x, y):
         decision = self.weights.dot(x)
         prediction = np.sign(decision)
-        v = x @ self.sigma @ x.T
+        v = (x @ self.sigma @ x.T) * self.class_weight_[y]
         m = y * decision
         if prediction != y:
             if v != 0:
@@ -61,5 +66,10 @@ class IELLIP(OnlineLearningModel):
         self.sigma = self.a * np.eye(X.shape[1])
 
     def get_params(self, deep=True):
-        return {'a': self.a, 'b': self.b, 'c': self.c, 'num_iterations':\
-             self.num_iterations, 'random_state': self.random_state}
+        params = super().get_params()
+
+        params['a'] = self.a
+        params['b'] = self.b
+        params['c'] = self.c
+
+        return params

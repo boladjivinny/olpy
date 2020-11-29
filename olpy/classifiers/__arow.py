@@ -5,7 +5,8 @@ from olpy._model import OnlineLearningModel
 class AROW(OnlineLearningModel):
     name = "AROW"
     
-    def __init__(self, r=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, r=1, num_iterations=20, random_state=None, \
+                    positive_label=1, class_weight=None):
         """
         Instantiate an AROW model for training.
         
@@ -23,19 +24,23 @@ class AROW(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
         self.r = r
         self.sigma = None
 
     def _update(self, x: np.ndarray, y: int):
         f_t = self.weights.dot(x)
         v_t = x @ self.sigma @ x.T
-        loss = max(0, 1 - f_t * y)
+        loss = max(0, 1 - f_t * y) * self.class_weight_[y]
         if loss > 0:
             beta_t = 1 / (v_t + self.r)
             alpha_t = loss * beta_t
@@ -47,5 +52,7 @@ class AROW(OnlineLearningModel):
         self.sigma = np.identity(X.shape[1])
 
     def get_params(self, deep=True):
-        {'r': self.r, 'num_iterations': self.num_iterations, \
-            'random_state': self.random_state}
+        params = super().get_params()
+        params['r'] = self.r
+
+        return params

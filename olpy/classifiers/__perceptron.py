@@ -23,6 +23,7 @@ class Perceptron(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        
 
         Returns
         -------
@@ -83,5 +84,7 @@ class SecondOrderPerceptron(Perceptron):
         self.sigma = sigma_t
 
     def get_params(self, deep=True):
-        return {'a': self.a, 'num_iterations': self.num_iterations, \
-            'random_state': self.random_state}
+        params = super().get_params()
+        params['a'] = self.a
+
+        return params

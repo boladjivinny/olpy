@@ -8,7 +8,8 @@ from olpy import OnlineLearningModel
 class OGD(OnlineLearningModel):
     name = "Online Gradient Descent"
     
-    def __init__(self, C=1, loss_function=zero_one_loss, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, C=1, loss_function=zero_one_loss, num_iterations=20, \
+                    random_state=None, positive_label=1, class_weight=None):
         """
         Instantiate an Online Gradient Descent model for training.
 
@@ -32,12 +33,16 @@ class OGD(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
         self.C = C
         self.loss_function = loss_function
         self.t = 0
@@ -54,6 +59,7 @@ class OGD(OnlineLearningModel):
         else:
             loss = self.loss_function([y], [prediction])
 
+        loss *= self.class_weight_[y]
         if loss > 0:
             if self.loss_function == log_loss:
                 self.weights = self.weights + C * y * x * (1 / (1 + math.exp(y * decision)))
@@ -65,9 +71,11 @@ class OGD(OnlineLearningModel):
         self.t += 1
 
     def get_params(self, deep=True):
-        return {'C': self.C, 'loss_function': self.loss_function,\
-            'num_iterations': self.num_iterations, 'random_state': \
-                self.random_state}
+        params = super().get_params()
+        params['C'] = self.C
+        params['loss_function'] = self.loss_function
+
+        return params
 
     def _setup(self, X):
         self.t = 1

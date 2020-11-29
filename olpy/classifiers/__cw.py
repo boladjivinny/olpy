@@ -7,7 +7,8 @@ from olpy._model import OnlineLearningModel
 
 class CW(OnlineLearningModel):
     name = "Confidence-Weighted"
-    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None, \
+                    positive_label=1, class_weight=None):
         """
         Instantiate a Confidence Weighted model for training.
         
@@ -28,12 +29,16 @@ class CW(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
         self.a = a
         self.eta = eta
 
@@ -41,7 +46,7 @@ class CW(OnlineLearningModel):
         decision = self.weights.dot(x)
         v_t = x @ np.diag(np.diag(self.sigma)) @ x.T
         m_t = y * decision
-        loss = self.phi * math.sqrt(v_t) - m_t
+        loss = (self.phi * math.sqrt(v_t) - m_t) * self.class_weight_[y]
         if loss > 0:
             alpha_t = self._get_alpha(m_t, v_t)
             u_t = 0.25 * (-alpha_t * v_t * self.phi + math.sqrt(
@@ -65,14 +70,19 @@ class CW(OnlineLearningModel):
         self.xi = 1 + self.phi ** 2
 
     def get_params(self, deep=True):
-        return {'a': self.a, 'eta': self.eta, 'num_iterations': \
-            self.num_iterations, 'random_state': self.random_state}
+        params = super().get_params()
+
+        params['a'] = self.a
+        params['eta'] = self.eta
+
+        return params
 
 
 class SCW(CW):
     name = "Soft Confidence-Weighted"
 
-    def __init__(self, eta=0.7, C=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, eta=0.7, C=1, num_iterations=20, random_state=None, \
+                    positive_label=1, class_weight=None):
         """
         Instantiate a SOft Confidence Weighted model for training.
         
@@ -92,13 +102,16 @@ class SCW(CW):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
         super().__init__(eta=eta, a=1, num_iterations=num_iterations,\
-             random_state=random_state, positive_label=positive_label)
+             random_state=random_state, positive_label=positive_label, class_weight=class_weight)
         self.C = C
 
     def _get_alpha(self, m_t, v_t):
@@ -108,8 +121,13 @@ class SCW(CW):
         return min(alpha_t, self.C)
 
     def get_params(self, deep=True):
-        return {'C': self.C, 'eta': self.eta, 'num_iterations': \
-            self.num_iterations, 'random_state': self.random_state}
+        params = super().get_params()
+
+        params['C'] = self.C
+        params['eta'] = self.eta
+
+        del params['a']
+        return params
 
 
 
@@ -125,7 +143,8 @@ class SCW2(SCW):
 class ECCW(CW):
     name = "Exact Convex Confidence-Weighted Learning"
 
-    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, eta=0.7, a=1, num_iterations=20, random_state=None,\
+                     positive_label=1, class_weight=None):
         """
         Instantiate a Confidence Weighted model for training.
         
@@ -147,18 +166,17 @@ class ECCW(CW):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(eta=eta, a=a, num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(eta=eta, a=a, num_iterations=num_iterations, random_state=random_state,\
+             positive_label=positive_label, class_weight=class_weight)
 
     def _get_alpha(self, m_t, v_t):
         return max(0, (1/(v_t * self.xi)) * (-m_t * self.psi + \
             math.sqrt(m_t **2 * self.phi/4 + v_t * self.phi**2 * self.psi)))
-
-
-    def get_params(self, deep=True):
-        return {'a': self.a, 'eta': self.eta, 'num_iterations': \
-            self.num_iterations, 'random_state': self.random_state}

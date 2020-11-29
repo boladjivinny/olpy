@@ -8,7 +8,7 @@ from olpy.preprocessing import LabelEncoder
 class OnlineLearningModel():
     """Base class for the online learning models."""
 
-    def __init__(self, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, num_iterations=20, random_state=None, positive_label=1, class_weight=None):
         """
         Initializes the values needed for all the models.
 
@@ -30,6 +30,8 @@ class OnlineLearningModel():
         self.num_iterations = num_iterations
         self.positive_label = positive_label
         self.random_state = random_state
+        self.class_weight = class_weight
+        self.class_weight_ = None
 
         # Setting the random seed
 
@@ -54,8 +56,21 @@ class OnlineLearningModel():
         positive_label = kwargs.get('positive_label', 1)
 
         self.weights = np.zeros(X.shape[1])
-        y_transformed, self.labels = LabelEncoder(positive_label=positive_label)\
+        y_transformed, self.labels = LabelEncoder(positive_label=self.positive_label)\
                                             .fit_transform(Y, return_labels=True)
+        # We have the weights, with the initial encoding {0:0.3, 1:0.7}
+        if self.class_weight is not None:
+            self.class_weight_ = {
+                -1: self.class_weight[self.labels[0]],
+                self.positive_label: self.class_weight[positive_label],
+            }
+        # Balanced set
+        else:
+            self.class_weight_ = {
+                -1: 1,
+                1: 1
+            }
+
         random.seed(self.random_state)
         self._setup(X)
         
@@ -162,7 +177,7 @@ class OnlineLearningModel():
         -------
         float: Score of the model. Default is the accuracy score.
         """
-        return {"num_iterations": self.num_iterations}
+        return {"num_iterations": self.num_iterations, "class_weight": self.class_weight}
 
     def set_params(self, **parameters):
         """

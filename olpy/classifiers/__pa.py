@@ -7,7 +7,8 @@ from olpy._model import OnlineLearningModel
 class PA(OnlineLearningModel):
     name = "Passive-Aggressive"
 
-    def __init__(self, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, num_iterations=20, random_state=None, positive_label=1,\
+                    class_weight=None):
         """
         Instantiates the Passive-Aggressive Model for training.
 
@@ -25,16 +26,20 @@ class PA(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
 
     def _update(self, x: np.ndarray, y: int):
         decision = self.weights.dot(x)
-        loss = max(0, 1 - y * decision)
+        loss = max(0, 1 - y * decision) * self.class_weight_[y]
         if loss > 0:
             sq_norm = LA.norm(x) ** 2
             gamma = self._get_gamma(loss, sq_norm)
@@ -60,15 +65,12 @@ class PA(OnlineLearningModel):
         """
         return loss / s_t if s_t > 0 else 1
 
-    def get_params(self, deep=True):
-        return {'num_iterations': self.num_iterations, \
-            'random_state': self.random_state}
-
 
 class PA_I(PA):
     name = "Passive-Aggressive-I"
     
-    def __init__(self, C=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, C=1, num_iterations=20, random_state=None, positive_label=1,\
+                    class_weight=None):
         """
         Instantiates the Passive-Aggressive-I Model for training.
 
@@ -88,26 +90,33 @@ class PA_I(PA):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
         self.C = C
 
     def _get_gamma(self, loss, s):
         return min(self.C, loss / s)
 
     def get_params(self, deep=True):
-        return {'C': self.C, 'num_iterations': self.num_iterations, \
-            'random_state': self.random_state}
+        params = super().get_params()
+        params['C'] = self.C
+
+        return params
 
 
 class PA_II(PA):
     name = "Passive-Aggressive-II"
     
-    def __init__(self, C=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, C=1, num_iterations=20, random_state=None, positive_label=1, \
+                    class_weight=None):
         """
         Instantiates the Passive-Aggressive-II Model for training.
 
@@ -127,17 +136,23 @@ class PA_II(PA):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
         self.C = C
 
     def _get_gamma(self, loss, s_t):
         return loss / (s_t + (1/(2 * self.C )))
 
     def get_params(self, deep=True):
-        return {'C': self.C, 'num_iterations': self.num_iterations, \
-            'random_state': self.random_state}
+        params = super().get_params()
+        params['C'] = self.C
+
+        return params

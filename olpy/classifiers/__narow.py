@@ -5,7 +5,8 @@ from olpy._model import OnlineLearningModel
 class NAROW(OnlineLearningModel):
     name = "NAROW"
     
-    def __init__(self, a=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, a=1, num_iterations=20, random_state=None, \
+                    positive_label=1, class_weight=None):
         """
         Instantiate a new NAROW model for training.
         
@@ -24,12 +25,16 @@ class NAROW(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+                            positive_label=positive_label, class_weight=class_weight)
         self.a = a
 
     def _update(self, x: np.ndarray, y: int):
@@ -42,7 +47,7 @@ class NAROW(OnlineLearningModel):
             else:
                 r_t = -float("inf")
             beta_t = 1 / (v_t + r_t)
-            alpha_t = max(0, 1 - m_t) * beta_t
+            alpha_t = max(0, 1 - m_t) * beta_t * self.class_weight_[y]
             sigma = np.expand_dims(x @ self.sigma.T, axis=0)
             self.weights += alpha_t * y * np.squeeze(sigma)
             self.sigma -= beta_t * sigma.T @ sigma
@@ -51,5 +56,7 @@ class NAROW(OnlineLearningModel):
         self.sigma = np.identity(X.shape[1])
 
     def get_params(self, deep=True):
-        return {'a': self.a, 'num_iterations': self.num_iterations, \
-            'random_state': self.random_state}
+        params = super().get_params()
+        params['a'] = self.a
+
+        return params

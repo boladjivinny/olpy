@@ -6,7 +6,8 @@ from olpy import OnlineLearningModel
 class NHerd(OnlineLearningModel):
     name = "Normal Herd"
     
-    def __init__(self, a=1, C=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, a=1, C=1, num_iterations=20, random_state=None, \
+                    positive_label=1, class_weight=None):
         """
         Instantiate an Normal Herd model for training.
 
@@ -29,12 +30,16 @@ class NHerd(OnlineLearningModel):
             Seed for the pseudorandom generator
         positive_label: 1 or -1
             Represents the value that is used as positive_label.
+        class_weight: dict
+            Represents the relative weight of the labels in the dataset.
+            Useful for imbalanced classification tasks.
 
         Returns
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, \
+            positive_label=positive_label, class_weight=class_weight)
         self.a = a
         self.C = C
         self.sigma = None
@@ -43,7 +48,7 @@ class NHerd(OnlineLearningModel):
         decision = self.weights.dot(x)
         v = x @ self.sigma @ x.T
         m = y * decision
-        loss = 1 - m
+        loss = (1 - m) * self.class_weight_[y]
         if loss > 0:
             beta = 1 / (v + 1/self.C)
             alpha = max(0, 1 - m) * beta
@@ -55,5 +60,8 @@ class NHerd(OnlineLearningModel):
         self.sigma = self.a * np.eye(X.shape[1])
 
     def get_params(self, deep=True):
-        return {'a': self.a, 'C': self.C, 'num_iterations':\
-             self.num_iterations, 'random_state': self.random_state}
+        params = super().get_params()
+        params['a'] = self.a
+        params['C'] = self.C
+
+        return params
