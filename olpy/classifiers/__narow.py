@@ -39,9 +39,9 @@ class NAROW(OnlineLearningModel):
 
     def _update(self, x: np.ndarray, y: int):
         decision = self.weights.dot(x)
-        v_t = x @ np.diag(np.diag(self.sigma)) @ x.T
+        v_t = x @ self.sigma @ x.T
         m_t = decision * y
-        if np.sign(self.weights.dot(x)) != y:
+        if 1 - m_t > 0:
             if v_t > (1 / self.a):
                 r_t = v_t / (self.a * v_t - 1)
             else:

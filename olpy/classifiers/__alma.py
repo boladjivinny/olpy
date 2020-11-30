@@ -9,7 +9,7 @@ from olpy import OnlineLearningModel
 class ALMA(OnlineLearningModel):
     name = "ALMA"
 
-    def __init__(self, alpha=1.0, p=2, B=1, C=1, num_iterations=20, random_state=None,
+    def __init__(self, alpha=1.0, p=2, C=1, num_iterations=20, random_state=None,
                  class_weight=None, positive_label=1):
         super().__init__(num_iterations=num_iterations, random_state=random_state,
                          positive_label=positive_label, class_weight=class_weight)
@@ -24,8 +24,8 @@ class ALMA(OnlineLearningModel):
         ----------
         p   : int, default 2
             ALMA's order, p > 0
-        B,C : float,  default: 1
-            Parameters of ALMA, B, C > 0
+        C : float,  default: 1
+            Parameter of ALMA, C > 0
         alpha: float, default=1
             The sensitivity of the model, 0 < alpha <=1
         num_iterations: int
@@ -43,10 +43,10 @@ class ALMA(OnlineLearningModel):
         None
         """
         self.p = p
-        self.B = B
         self.C = C
         self.alpha = alpha
 
+        self.B = 1
         self.k = 0
 
     def _update(self, x: np.ndarray, y: int):
@@ -60,11 +60,11 @@ class ALMA(OnlineLearningModel):
 
     def _setup(self, X):
         self.k = 1
+        self.B = 1/self.alpha
 
     def get_params(self, deep=True):
         params = super().get_params()
         params['p'] = self.p
-        params['B'] = self.B
         params['C'] = self.C
         params['alpha'] = self.alpha
 

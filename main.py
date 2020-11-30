@@ -7,7 +7,8 @@ import pandas as pd
 import numpy as np
 
 from olpy.classifiers import *
-from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, confusion_matrix
+from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, confusion_matrix, \
+    hinge_loss, log_loss, mean_squared_error, zero_one_loss
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils.class_weight import compute_class_weight
@@ -155,7 +156,6 @@ if __name__ == '__main__':
             models_.append(ALMA(random_state=seed, num_iterations=n_iterations))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)],
-                'B': list(np.arange(0.1, 1, 0.1)),
                 'p': range(2, 12, 2),
                 'alpha': list(np.arange(0.50, 1, 0.05))
             })
@@ -203,7 +203,8 @@ if __name__ == '__main__':
         if model == 'ogd':
             models_.append(OGD(random_state=seed, num_iterations=n_iterations))
             params_.append({
-                'C': [2 ** i for i in range(-4, 5)]
+                'C': [2 ** i for i in range(-4, 5)],
+                'loss_function': [hinge_loss, log_loss, mean_squared_error, zero_one_loss]
             })
         if model == 'pa':
             models_.append(PA(random_state=seed, num_iterations=n_iterations))
