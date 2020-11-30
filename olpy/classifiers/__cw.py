@@ -45,7 +45,7 @@ class CW(OnlineLearningModel):
 
     def _update(self, x: np.ndarray, y: int):
         decision = self.weights.dot(x)
-        v_t = x @ self.sigma @ x.T
+        v_t = x @ np.diag(np.diag(self.sigma)) @ x.T
         m_t = y * decision
         loss = (self.phi * math.sqrt(v_t) - m_t)
         if loss > 0:
