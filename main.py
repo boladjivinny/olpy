@@ -133,8 +133,7 @@ if __name__ == '__main__':
 
     # Scaling the dataset to avoid numerical issues
     Y_train = train_data.loc[:, label].to_numpy()
-    #X_train = scaler.fit_transform(train_data.drop(columns=[label]))
-    X_train = train_data.drop(columns=[label]).to_numpy()
+    X_train = scaler.fit_transform(train_data.drop(columns=[label]))
     Y_test = test_data.loc[:, label].to_numpy()
     X_test = scaler.fit_transform(test_data.drop(columns=[label]))
 
