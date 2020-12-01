@@ -6,7 +6,7 @@ from olpy import OnlineLearningModel
 class Perceptron(OnlineLearningModel):
     name = "Perceptron"
 
-    def __init__(self, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, num_iterations=20, random_state=None, positive_label=1, class_weight=None):
         """
         Instantiates the Perceptron model for training.
 
@@ -28,10 +28,11 @@ class Perceptron(OnlineLearningModel):
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label,
+                         class_weight=class_weight)
 
     def _update(self, x: np.ndarray, y: int):
-        prediction = np.sign(self.weights.dot(x))
+        prediction = -1 if self.weights.dot(x) < 0 else 1
         if y != prediction:
             self.weights = self.weights + y * x * self.class_weight_[y]
 
@@ -39,7 +40,7 @@ class Perceptron(OnlineLearningModel):
 class SecondOrderPerceptron(Perceptron):
     name = "Second Order Perceptron"
     
-    def __init__(self, a=1, num_iterations=20, random_state=None, positive_label=1):
+    def __init__(self, a=1, num_iterations=20, random_state=None, positive_label=1, class_weight=None):
         """
         Instantiate a Second Order Perceptron instance for training.
 
@@ -62,7 +63,8 @@ class SecondOrderPerceptron(Perceptron):
         -------
         None
         """
-        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label)
+        super().__init__(num_iterations=num_iterations, random_state=random_state, positive_label=positive_label,
+                         class_weight=class_weight)
         self.a = a
 
     def _setup(self, X: np.ndarray):

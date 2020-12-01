@@ -7,11 +7,11 @@ import pandas as pd
 import numpy as np
 
 from olpy.classifiers import *
-from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, confusion_matrix, \
-    hinge_loss, log_loss, mean_squared_error, zero_one_loss
+from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, confusion_matrix, hinge_loss
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils.class_weight import compute_class_weight
+
 
 
 class FullPaths(argparse.Action):
@@ -133,7 +133,8 @@ if __name__ == '__main__':
 
     # Scaling the dataset to avoid numerical issues
     Y_train = train_data.loc[:, label].to_numpy()
-    X_train = scaler.fit_transform(train_data.drop(columns=[label]))
+    #X_train = scaler.fit_transform(train_data.drop(columns=[label]))
+    X_train = train_data.drop(columns=[label]).to_numpy()
     Y_test = test_data.loc[:, label].to_numpy()
     X_test = scaler.fit_transform(test_data.drop(columns=[label]))
 
@@ -153,85 +154,84 @@ if __name__ == '__main__':
     for model in set(models):
         model = model.lower()
         if model == 'alma':
-            models_.append(ALMA(random_state=seed, num_iterations=n_iterations))
+            models_.append(ALMA(random_state=seed))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)],
                 'p': range(2, 12, 2),
                 'alpha': list(np.arange(0.50, 1, 0.05))
             })
         if model == 'arow':
-            models_.append(AROW(random_state=seed, num_iterations=n_iterations))
+            models_.append(AROW(random_state=seed))
             params_.append({
                 'r': [2 ** i for i in range(-4, 5)]
             })
         if model == 'cw':
-            models_.append(CW(random_state=seed, num_iterations=n_iterations))
+            models_.append(CW(random_state=seed))
             params_.append({
                 'a': list(np.arange(0.1, 1, 0.1)),
                 'eta': list(np.arange(0.50, 1, 0.05))
             })
         if model == 'scw':
-            models_.append(SCW(random_state=seed, num_iterations=n_iterations))
+            models_.append(SCW(random_state=seed))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)],
                 'eta': list(np.arange(0.50, 1, 0.05))
             })
         if model == 'scw2':
-            models_.append(SCW2(random_state=seed, num_iterations=n_iterations))
+            models_.append(SCW2(random_state=seed))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)],
                 'eta': list(np.arange(0.50, 1, 0.05))
             })
         if model == 'iellip':
-            models_.append(IELLIP(random_state=seed, num_iterations=n_iterations))
+            models_.append(IELLIP(random_state=seed))
             params_.append({
                 'a': list(np.arange(0.1, 1.1, 0.1)),
                 'b': list(np.arange(0.1, 1.1, 0.1)),
                 'c': list(np.arange(0.1, 1.1, 0.1))
             })
         if model == 'narow':
-            models_.append(NAROW(random_state=seed, num_iterations=n_iterations))
+            models_.append(NAROW(random_state=seed))
             params_.append({
                 'a': list(np.arange(0.1, 1.1, 0.1)),
             })
         if model == 'nherd':
-            models_.append(NHerd(random_state=seed, num_iterations=n_iterations))
+            models_.append(NHerd(random_state=seed))
             params_.append({
                 'a': list(np.arange(0.1, 1.1, 0.1)),
                 'C': [2 ** i for i in range(-4, 5)]
             })
         if model == 'ogd':
-            models_.append(OGD(random_state=seed, num_iterations=n_iterations))
+            models_.append(OGD(random_state=seed))
             params_.append({
-                'C': [2 ** i for i in range(-4, 5)],
-                'loss_function': [hinge_loss, log_loss, mean_squared_error, zero_one_loss]
+                'C': [2 ** i for i in range(-4, 5)]
             })
         if model == 'pa':
-            models_.append(PA(random_state=seed, num_iterations=n_iterations))
+            models_.append(PA(random_state=seed))
             params_.append({})
         if model == 'pa1':
-            models_.append(PA_I(random_state=seed, num_iterations=n_iterations))
+            models_.append(PA_I(random_state=seed))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)]
             })
         if model == 'pa2':
-            models_.append(PA_II(random_state=seed, num_iterations=n_iterations))
+            models_.append(PA_II(random_state=seed))
             params_.append({
                 'C': [2 ** i for i in range(-4, 5)]
             })
         if model == 'perceptron':
-            models_.append(Perceptron(random_state=seed, num_iterations=n_iterations))
+            models_.append(Perceptron(random_state=seed))
             params_.append({})
         if model == 'sop':
-            models_.append(SecondOrderPerceptron(random_state=seed, num_iterations=n_iterations))
+            models_.append(SecondOrderPerceptron(random_state=seed))
             params_.append({
                 'a': list(np.arange(0.1, 1.1, 0.1))
             })
         if model == 'romma':
-            models_.append(ROMMA(random_state=seed, num_iterations=n_iterations))
+            models_.append(ROMMA(random_state=seed))
             params_.append({})
         if model == 'aromma':
-            models_.append(aROMMA(random_state=seed, num_iterations=n_iterations))
+            models_.append(aROMMA(random_state=seed))
             params_.append({})
 
     summary = pd.DataFrame(np.zeros((len(models_), 10)), columns=['Training-Time', 'Prediction-Time', 'Accuracy',
@@ -248,58 +248,56 @@ if __name__ == '__main__':
     i = 0
     best_params_record = "Best params: \n"
     for model in models_:
-        model_ = model
         if use_weights:
-            model_.set_params(class_weight=class_weight)
+            model.set_params(class_weight=class_weight)
         if cv:
             model_ = GridSearchCV(model, params_[i], refit='recall', n_jobs=-1)
-        training_start = time.time()
-        # Try, catch to avoid errors stopping the program
-        try:
             model_.fit(X_train, Y_train, verbose=False)
-            duration = time.time() - training_start
+            # After collecting, let's save, report and proceed
+            model.set_params(**model_.best_params_)
+            best_params_record += model.name + "\n" + str(model_.best_params_) + "\n\n"
+        # Set the number of iterations now
+        model.set_params(num_iterations=n_iterations)
+        training_start = time.time()
 
-            scores = model_.decision_function(X_test)
-            test_start = time.time()
-            preds = model_.predict(X_test)
-            preds_duration = time.time() - test_start
+        model.fit(X_train, Y_train, verbose=False)
+        duration = time.time() - training_start
 
-            acc = accuracy_score(Y_test, preds)
-            f1 = f1_score(Y_test, preds)
-            tn, fp, fn, tp = confusion_matrix(Y_test, preds, normalize='true').ravel()
+        scores = model.decision_function(X_test)
+        test_start = time.time()
+        preds = model.predict(X_test)
+        preds_duration = time.time() - test_start
 
-            # ROC would not compute if for instance we have only one class in the test dataset.
-            # This is the case for svmguide3 dataset included
-            try:
-                roc = roc_auc_score(Y_test, scores)
-            except ValueError:
-                roc = 0
+        acc = accuracy_score(Y_test, preds)
+        f1 = f1_score(Y_test, preds)
+        tn, fp, fn, tp = confusion_matrix(Y_test, preds, normalize='true').ravel()
 
-            if cv:
-                best_params_record += model.name + "\n" + str(model_.best_params_) + "\n\n"
+        # ROC would not compute if for instance we have only one class in the test dataset.
+        # This is the case for svmguide3 dataset included
+        try:
+            roc = roc_auc_score(Y_test, scores)
+        except ValueError:
+            roc = 0
 
-            if verbose:
-                print("%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" %
-                      (list(set(models))[i], 1000 * duration, 1000 * preds_duration, acc, f1,
-                       roc, tp, tn, fp, fn))
+        if verbose:
+            print("%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" %
+                  (list(set(models))[i], 1000 * duration, 1000 * preds_duration, acc, f1,
+                   roc, tp, tn, fp, fn))
 
-            summary.loc[i, 'Training-Time'] = duration
-            summary.loc[i, 'Prediction-Time'] = preds_duration
-            summary.loc[i, 'Accuracy'] = acc
-            summary.loc[i, 'F1-Score'] = f1
-            summary.loc[i, 'ROC_AUC-Score'] = roc
-            summary.loc[i, 'TP'] = tp
-            summary.loc[i, 'TN'] = tn
-            summary.loc[i, 'FP'] = fp
-            summary.loc[i, 'FN'] = fn
+        summary.loc[i, 'Training-Time'] = duration
+        summary.loc[i, 'Prediction-Time'] = preds_duration
+        summary.loc[i, 'Accuracy'] = acc
+        summary.loc[i, 'F1-Score'] = f1
+        summary.loc[i, 'ROC_AUC-Score'] = roc
+        summary.loc[i, 'TP'] = tp
+        summary.loc[i, 'TN'] = tn
+        summary.loc[i, 'FP'] = fp
+        summary.loc[i, 'FN'] = fn
 
-            if dump:
-                # Save the model
-                joblib.dump(model_, model_dir + '/' + list(set(models))[i] + '.dump')
+        if dump:
+            # Save the model
+            joblib.dump(model, model_dir + '/' + list(set(models))[i] + '.dump')
 
-        except Exception as e:
-            print(e)
-            print(model.name, "- Failed\n", e)
         i = i + 1
     if cv:
         print()
