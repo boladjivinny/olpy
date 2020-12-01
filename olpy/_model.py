@@ -9,7 +9,7 @@ from olpy.preprocessing import LabelEncoder
 class OnlineLearningModel:
     """Base class for the online learning models."""
 
-    def __init__(self, num_iterations=20, random_state=None, positive_label=1, class_weight=None):
+    def __init__(self, num_iterations=1, random_state=None, positive_label=1, class_weight=None):
         """
         Initializes the values needed for all the models.
 

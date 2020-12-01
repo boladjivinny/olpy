@@ -187,7 +187,7 @@ if __name__ == '__main__':
             params_.append({
                 'a': list(np.arange(0.1, 1.1, 0.1)),
                 'b': list(np.arange(0.1, 1.1, 0.1)),
-                'c': list(np.arange(0.1, 1.1, 0.1))
+                'c': list(np.arange(0.1, 1.0, 0.1))
             })
         if model == 'narow':
             models_.append(NAROW(random_state=seed))
@@ -250,13 +250,15 @@ if __name__ == '__main__':
         if use_weights:
             model.set_params(class_weight=class_weight)
         if cv:
-            model_ = GridSearchCV(model, params_[i], refit='recall', n_jobs=-1)
+            model_ = GridSearchCV(model, params_[i], n_jobs=-1)
             model_.fit(X_train, Y_train, verbose=False)
             # After collecting, let's save, report and proceed
             model.set_params(**model_.best_params_)
             best_params_record += model.name + "\n" + str(model_.best_params_) + "\n\n"
+            print(model.a)
         # Set the number of iterations now
         model.set_params(num_iterations=n_iterations)
+        print(model.a)
         training_start = time.time()
 
         model.fit(X_train, Y_train, verbose=False)
