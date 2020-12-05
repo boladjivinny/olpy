@@ -258,7 +258,6 @@ if __name__ == '__main__':
             print(model.a)
         # Set the number of iterations now
         model.set_params(num_iterations=n_iterations)
-        print(model.a)
         training_start = time.time()
 
         model.fit(X_train, Y_train, verbose=False)
