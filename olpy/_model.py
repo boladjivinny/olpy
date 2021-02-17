@@ -161,6 +161,24 @@ class OnlineLearningModel:
         """
         return X @ self.weights
 
+    def predict_proba(self, X):
+        """
+        Compute the probability that a model is from a class.
+
+        Parameters
+        ----------
+        X   : array or np.ndarray
+            Input variable with dimension (n, m)
+        Returns
+        -------
+        array(n, f), with f the number of classes available
+        """
+	pred = (X @ self.weights).tolist()
+	probs = []
+	probs.append([1 - p for p in pred])
+	probs.append(pred)
+        return probs
+
     def get_params(self, deep=True):
         """
         Returns the parameters that can be evaluated

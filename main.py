@@ -11,6 +11,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, confusion_m
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils.class_weight import compute_class_weight
+from imblearn.over_sampling import SMOTE
 
 
 
@@ -90,12 +91,16 @@ def olpy_parse_args():
     parser.add_argument('-d', '--dump', help="Whether or not a the models \
                                              should be dumped.", action="store_true")
 
-    parser.add_argument('-w', '--use-weights', help="Whether or not a the models \
-                                                 should be dumped.", action="store_true")
+    parser.add_argument('-w', '--use-weights', help="Whether or not  weights should be used \
+                                                 while training the models.", action="store_true")
 
     parser.add_argument('--dump-dir', action=FullPaths, type=is_dir, default='.',
                         help="Output directory for dumping the models."
                              '(default: %(default)s)')
+    parser.add_argument('--weights', help="Custom weights to use with the training", type=float,
+                            nargs='+')
+
+    parser.add_argument('-t', help="If want to use oversampling, the technique to use.\n1-SMOTE", type=int)
 
     parser.add_argument('--cv', help="Whether or not hyper-parameter through \
                                      cross validation should be done.", action="store_true")
@@ -121,6 +126,8 @@ if __name__ == '__main__':
     cv = args.cv
     dump = args.dump
     model_dir = args.dump_dir
+    weights = args.weights
+    technique = 'SMOTE' if args.t == 1 else 0
 
     # Load the datasets
     scaler = MinMaxScaler()
@@ -137,9 +144,17 @@ if __name__ == '__main__':
     Y_test = test_data.loc[:, label].to_numpy()
     X_test = scaler.fit_transform(test_data.drop(columns=[label]))
 
+    if technique == 'SMOTE':
+        X_train, Y_train = SMOTE().fit_resample(X_train, Y_train)	
+
+    # Check the oversampling now
     class_weight = None
     if use_weights:
-        class_weight = compute_class_weight(class_weight='balanced', classes=np.unique(Y_train), y=Y_train)
+        if weights is not None and len(weights) >= 2:
+            class_weight = np.array(weights)
+        else:
+            class_weight = compute_class_weight(class_weight='balanced', classes=np.unique(Y_train), y=Y_train)
+        
 
     # First we replace all by the list of available models
     if models == '--all' or '--all' in models:
@@ -255,7 +270,7 @@ if __name__ == '__main__':
             # After collecting, let's save, report and proceed
             model.set_params(**model_.best_params_)
             best_params_record += model.name + "\n" + str(model_.best_params_) + "\n\n"
-            print(model.a)
+
         # Set the number of iterations now
         model.set_params(num_iterations=n_iterations)
         training_start = time.time()
