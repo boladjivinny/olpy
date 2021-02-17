@@ -4,6 +4,7 @@ import random
 import numpy as np
 
 from olpy.preprocessing import LabelEncoder
+from olpy.exceptions import NotFittedError
 
 
 class OnlineLearningModel:
@@ -90,6 +91,26 @@ class OnlineLearningModel:
                              np.count_nonzero(prediction == Y), X.shape[0]))
         return self
 
+    def partial_fit(self, x, y):
+        """
+        Trains the model on a single data point
+
+        Parameters
+        ----------
+        x   : array or np.ndarray
+              Input variable with dimension (m, )
+        y   : Output variable with binary labels.
+        
+        Returns
+        -------
+        self
+        """
+        positive_label = kwargs.get('positive_label', 1)
+        # Set the value to -1 
+        y = y[0] if y[0] == self.postive_label else -1
+        self._update(x, y)
+        return self
+
     def _update(self, x: np.ndarray, y: int):
         """
         Updates the weight vector in case a mistake occured.
@@ -129,6 +150,7 @@ class OnlineLearningModel:
         -------
         np.ndarray with dimension (n,) representing the output label
         """
+        if not self.weights : raise NotFittedError
         return [self.labels[0] if val <= 0 else 1 for val in X @ self.weights]
 
     def score(self, X, y):
