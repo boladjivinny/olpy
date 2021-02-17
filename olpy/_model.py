@@ -27,6 +27,7 @@ class OnlineLearningModel:
         -------
         None
         """
+        self.name = ""
         self.weights = None
         self.labels = None
         self.num_iterations = num_iterations
@@ -35,7 +36,10 @@ class OnlineLearningModel:
         self.positive_label = positive_label
         self.random_state = random_state
         self.class_weight = class_weight
-        self.class_weight_ = None
+        self.class_weight_ = {
+            -1: 1,
+            1: 1
+        }
 
         # Setting the random seed
 
@@ -68,12 +72,6 @@ class OnlineLearningModel:
                 -1: weights[self.labels[0]],
                 1: weights[positive_label],
             }
-        # Balanced set
-        else:
-            self.class_weight_ = {
-                -1: 1,
-                1: 1
-            }
         random.seed(self.random_state)
         self._setup(X)
 
@@ -91,7 +89,7 @@ class OnlineLearningModel:
                              np.count_nonzero(prediction == Y), X.shape[0]))
         return self
 
-    def partial_fit(self, x, y):
+    def partial_fit(self, x, y, classes=[0, 1]):
         """
         Trains the model on a single data point
 
@@ -105,10 +103,14 @@ class OnlineLearningModel:
         -------
         self
         """
-        positive_label = kwargs.get('positive_label', 1)
         # Set the value to -1 
-        y = y[0] if y[0] == self.postive_label else -1
-        self._update(x, y)
+        y = y[0] if y[0] == self.positive_label else -1
+        self.labels = classes
+        if self.weights is None: 
+            self._setup(x)
+            self.weights = np.zeros(x.shape[1])
+
+        self._update(x[0], y)
         return self
 
     def _update(self, x: np.ndarray, y: int):
@@ -150,7 +152,10 @@ class OnlineLearningModel:
         -------
         np.ndarray with dimension (n,) representing the output label
         """
-        if not self.weights : raise NotFittedError
+        if self.weights is None : 
+            raise NotFittedError(f"{self.name} untrained",
+                                 "Attempted to predict using the model", 
+                                "This model has not yet been fitted")
         return [self.labels[0] if val <= 0 else 1 for val in X @ self.weights]
 
     def score(self, X, y):
@@ -195,10 +200,10 @@ class OnlineLearningModel:
         -------
         array(n, f), with f the number of classes available
         """
-	pred = (X @ self.weights).tolist()
-	probs = []
-	probs.append([1 - p for p in pred])
-	probs.append(pred)
+        pred = (X @ self.weights).tolist()
+        probs = []
+        probs.append([1 - p for p in pred])
+        probs.append(pred)
         return probs
 
     def get_params(self, deep=True):
