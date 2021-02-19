@@ -1,121 +1,142 @@
+"""
+This is the main module of the OLPy package.
+It compares the performance of the various algorithms and returns the
+result to the use in the desired format.
+"""
+
+__all__ = []
+__version__ = '1.0.0'
+__author__ = 'Boladji Vinny'
+
 import argparse
 import time
 import os
 import joblib
+import pathlib
 
 import pandas as pd
 import numpy as np
 
 from olpy.classifiers import *
-from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, confusion_matrix, hinge_loss
+from sklearn.metrics import (accuracy_score, roc_auc_score, f1_score, 
+                            confusion_matrix, hinge_loss)
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils.class_weight import compute_class_weight
-from imblearn.over_sampling import SMOTE
-
-
-
-class FullPaths(argparse.Action):
-    """Expand user- and relative-paths"""
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, os.path.abspath(os.path.expanduser(values)))
-
-
-def is_dir(dirname):
-    """Checks if a path is an actual directory"""
-    if not os.path.isdir(dirname):
-        msg = "{0} is not a directory".format(dirname)
-        raise argparse.ArgumentTypeError(msg)
-    else:
-        return dirname
-
-
-def print_models():
-    list_of_models = {
-        'alma': 'A New Approximate Maximal Margin Classification Algorithm (ALMA)',
-        'arow': 'Adaptive regularization of weight vectors (AROW)',
-        'cw': 'Confidence Weighted',
-        'scw': 'Soft Confidence Weighted',
-        'scw2': 'Soft Confidence Weighted (version 2)',
-        'iellip': 'Improved Ellipsoid',
-        'narow': 'New adaptive algorithms for online classification',
-        'nherd': 'Normal Herd',
-        'ogd': 'Online Gradient Descent',
-        'pa': 'Passive Aggressive',
-        'pa1': 'Passive Aggressive I',
-        'pa2': 'Passive Aggressive II',
-        'perceptron': 'Perceptron',
-        'sop': 'Second Order Perceptron',
-        'romma': 'Relaxed Online Maximum Margin Algorithm',
-        'aromma': 'Aggressive ROMMA'
-    }
-
-    message = ''
-    for short, desc in list_of_models.items():
-        message += short + "\t\t:" + desc
-        message += '\n'
-
-    return message
 
 
 def olpy_parse_args():
-    parser = argparse.ArgumentParser(description='After receiving input\
-              from the user, this program train a series of Online Machine\
-              Learning models for binary classification.')
-
-    parser.add_argument('train_set', metavar='TRAINING',
-                        help='file containing the training dataset. CSV file \
-                             expected', type=argparse.FileType('r'), nargs=1)
-    parser.add_argument('test_set', metavar='TESTING',
-                        help='containing the test dataset. CSV file \
-                            expected', type=argparse.FileType('r'), nargs=1)
-    parser.add_argument('-l', '--label', type=str, default='Label',
-                        help='index of the target variable.\
-                            (default:  %(default)s)')
-    parser.add_argument('--models', type=str, nargs='+', default='--all',
-                        help='The list of models to try from. \n Choices are: \
-                            \n' + print_models() + '. or use use %(default)s')
-    parser.add_argument('-n', type=int, default=1, help='the number of \
-                            iterations to run. (default: \
-                            %(default)s)')
-    parser.add_argument('-s', type=int, default=None, help='the random seed\
-                            to use in training the models. (default: \
-                            %(default)s)')
-    parser.add_argument('-o', type=str, default='experiment-results.csv',
-                        help='file to which the reports would be saved\
-                            (default: %(default)s)')
-    parser.add_argument('-b', '--bias', help="Whether or not a bias should be \
-                                             used.", action="store_true")
-
-    parser.add_argument('-d', '--dump', help="Whether or not a the models \
-                                             should be dumped.", action="store_true")
-
-    parser.add_argument('-w', '--use-weights', help="Whether or not  weights should be used \
-                                                 while training the models.", action="store_true")
-
-    parser.add_argument('--dump-dir', action=FullPaths, type=is_dir, default='.',
-                        help="Output directory for dumping the models."
-                             '(default: %(default)s)')
-    parser.add_argument('--weights', help="Custom weights to use with the training", type=float,
-                            nargs='+')
-
-    parser.add_argument('-t', help="If want to use oversampling, the technique to use.\n1-SMOTE", type=int)
-
-    parser.add_argument('--cv', help="Whether or not hyper-parameter through \
-                                     cross validation should be done.", action="store_true")
-
-    parser.add_argument('-v', '--verbose', help='whether the program should \
-                                have a verbose output or not', action="store_true")
+    parser = argparse.ArgumentParser(
+        prog="OLPy",
+        description='After receiving input from the user, this program trains\
+                     a series of Online Machine Learning models for binary\
+                     classification.'
+    )
+    parser.add_argument(
+        'train_set', 
+        metavar='TRAINING SET',
+        help='CSV file containing the training dataset.',
+        type=argparse.FileType('r')
+    )
+    parser.add_argument(
+        'test_set', 
+        metavar='TESTING SET',
+        help='CSV file containing the test dataset.',
+        type=argparse.FileType('r')
+    )
+    parser.add_argument(
+        '-l', 
+        '--label', 
+        type=str, 
+        default='Label',
+        help='index of the target variable. (default:  %(default)s)'
+    )
+    parser.add_argument(
+        '--models', 
+        type=str, 
+        nargs='+', 
+        default='all',
+        help='the list of models to try from or use use %(default)s',
+        choices=[
+            'all', 'alma', 'arow', 'cw', 'scw', 'scw2', 'iellip', 'narow',
+            'nherd', 'ogd', 'pa', 'pa1', 'pa2', 'perceptron', 'sop', 'romma',
+            'aromma'
+        ]
+    )
+    parser.add_argument(
+        '-n', 
+        type=int, 
+        default=1, 
+        help='the number of iterations to run. (default: %(default)s)'
+    )
+    parser.add_argument(
+        '-s', 
+        type=int, 
+        default=None, 
+        help='the random seed to use in training the models. \
+            (default: %(default)s)'
+    )
+    parser.add_argument(
+        '-o', 
+        type=str, 
+        default='experiment-results.csv',
+        help='file to which the reports would be saved \
+            (default: %(default)s)'
+    )
+    parser.add_argument(
+        '-b', 
+        '--bias', 
+        help="whether or not a bias should be used for the training.", 
+        action="store_true"
+    )
+    parser.add_argument(
+        '-w', 
+        '--use-weights', 
+        help="whether or not  weights should be used while training the\
+             models.",
+        action="store_true"
+    )
+    parser.add_argument(
+        '--weights', 
+        help="custom weights to use with the training", 
+        type=float,
+        nargs='+'
+    )
+    parser.add_argument(
+        '--cv', 
+        help="whether or not hyper-parameter through cross validation should\
+             be done.", 
+        action="store_true"
+    )
+    parser.add_argument(
+        '-d',
+        '--dump-dir',
+        type=pathlib.Path, 
+        default='.',
+        help="output directory for dumping the models. (default: %(default)s)"
+    )
+    parser.add_argument(
+        '-v',
+        help='represents the verbosity level of the application. \
+            (default: %(default)d)', 
+        action="count",
+        default=0
+    )
+    parser.add_argument(
+        '--version', 
+        action='version', 
+        version='%(prog)s {}'.format(__version__) 
+    )
     return parser.parse_args()
 
 
 if __name__ == '__main__':
     args = olpy_parse_args()
+
     # Collect the arguments
-    train_file = args.train_set[0]
-    test_file = args.test_set[0]
-    verbose = args.verbose
+    train_file = args.train_set
+    test_file = args.test_set
+    verbose = args.v
     output_file = args.o
     seed = args.s
     models = args.models
@@ -124,10 +145,8 @@ if __name__ == '__main__':
     bias = args.bias
     use_weights = args.use_weights
     cv = args.cv
-    dump = args.dump
     model_dir = args.dump_dir
     weights = args.weights
-    technique = 'SMOTE' if args.t == 1 else 0
 
     # Load the datasets
     scaler = MinMaxScaler()
@@ -144,28 +163,31 @@ if __name__ == '__main__':
     Y_test = test_data.loc[:, label].to_numpy()
     X_test = scaler.fit_transform(test_data.drop(columns=[label]))
 
-    if technique == 'SMOTE':
-        X_train, Y_train = SMOTE().fit_resample(X_train, Y_train)	
-
     # Check the oversampling now
     class_weight = None
     if use_weights:
         if weights is not None and len(weights) >= 2:
             class_weight = np.array(weights)
         else:
-            class_weight = compute_class_weight(class_weight='balanced', classes=np.unique(Y_train), y=Y_train)
+            class_weight = compute_class_weight(
+                class_weight='balanced', 
+                classes=np.unique(Y_train), 
+                y=Y_train
+            )
         
 
     # First we replace all by the list of available models
-    if models == '--all' or '--all' in models:
-        models = ['alma', 'arow', 'cw', 'scw', 'scw2', 'iellip', 'narow', 'nherd',
-                  'ogd', 'pa', 'pa1', 'pa2', 'perceptron', 'sop', 'romma', 'aromma']
+    if models == 'all' or 'all' in models:
+        models = [
+            'alma', 'arow', 'cw', 'scw', 'scw2', 'iellip', 'narow', 'nherd',
+            'ogd', 'pa', 'pa1', 'pa2', 'perceptron', 'sop', 'romma', 'aromma'
+        ]
 
     # Create a variable to store the model objects
     models_ = []
     params_ = []
 
-    for model in set(models):
+    for model in models:
         model = model.lower()
         if model == 'alma':
             models_.append(ALMA(random_state=seed))
@@ -248,28 +270,36 @@ if __name__ == '__main__':
             models_.append(aROMMA(random_state=seed))
             params_.append({})
 
-    summary = pd.DataFrame(np.zeros((len(models_), 10)), columns=['Training-Time', 'Prediction-Time', 'Accuracy',
-                                                                  'F1-Score', 'Recall', 'ROC_AUC-Score', 'FP', 'FN',
-                                                                  'TP', 'TN'])
+    summary = pd.DataFrame(
+        np.zeros((len(models_), 10)), 
+        columns=[
+            'Training-Time', 'Prediction-Time', 'Accuracy', 'F1-Score', 
+            'Recall', 'ROC_AUC-Score', 'FP', 'FN', 'TP', 'TN'
+        ])
     summary.insert(0, 'Model', [model.name for model in models_])
 
-    if verbose:
-        print("%9s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s" %
-              ('algorithm', 'train time (s)', 'test time (s)', 'accuracy', 'f1-score', 'roc-auc',
-               'true positive', 'true negative', 'false positive', 'false negative'))
-        print()
+    if verbose > 0:
+        print(
+            "%9s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\n" %
+            (
+                  'algorithm', 'train time (s)', 'test time (s)', 'accuracy',
+                  'f1-score', 'roc-auc','true positive', 'true negative', 
+                  'false positive', 'false negative'
+            ))
 
     i = 0
     best_params_record = "Best params: \n"
     for model in models_:
         if use_weights:
             model.set_params(class_weight=class_weight)
+        # Use the verbose level from the command line
         if cv:
             model_ = GridSearchCV(model, params_[i], n_jobs=-1)
-            model_.fit(X_train, Y_train, verbose=False)
+            model_.fit(X_train, Y_train, verbose=verbose-1)
             # After collecting, let's save, report and proceed
             model.set_params(**model_.best_params_)
-            best_params_record += model.name + "\n" + str(model_.best_params_) + "\n\n"
+            best_params_record += (model.name + "\n" 
+                                   + str(model_.best_params_) + "\n\n")
 
         # Set the number of iterations now
         model.set_params(num_iterations=n_iterations)
@@ -285,19 +315,25 @@ if __name__ == '__main__':
 
         acc = accuracy_score(Y_test, preds)
         f1 = f1_score(Y_test, preds)
-        tn, fp, fn, tp = confusion_matrix(Y_test, preds, normalize='true').ravel()
+        tn, fp, fn, tp = confusion_matrix(Y_test, preds,
+                             normalize='true').ravel()
 
-        # ROC would not compute if for instance we have only one class in the test dataset.
-        # This is the case for svmguide3 dataset included
+        # ROC would not compute if for instance we have only one class in the
+        # test data.
+        # This is the case for the svmguide3 dataset bundled with the package.
         try:
             roc = roc_auc_score(Y_test, scores)
         except ValueError:
-            roc = 0
+            roc = np.nan
 
         if verbose:
-            print("%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" %
-                  (list(set(models))[i], 1000 * duration, 1000 * preds_duration, acc, f1,
-                   roc, tp, tn, fp, fn))
+            print(
+                "%-12s\t%-3f\t%-3f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f\t%-5f" 
+                %
+                (list(
+                    set(models))[i], duration, preds_duration,
+                     acc, f1, roc, tp, tn, fp, fn
+                ))
 
         summary.loc[i, 'Training-Time'] = duration
         summary.loc[i, 'Prediction-Time'] = preds_duration
@@ -309,14 +345,17 @@ if __name__ == '__main__':
         summary.loc[i, 'FP'] = fp
         summary.loc[i, 'FN'] = fn
 
-        if dump:
+        if model_dir is not None:
             # Save the model
-            joblib.dump(model, model_dir + '/' + list(set(models))[i] + '.dump')
+            dump_name = list(set(models))[i] + '.dump'
+            joblib.dump(model, model_dir  / dump_name)
 
         i = i + 1
+
     if cv:
         print()
         print()
         print(best_params_record)
-    if output_file:
+
+    if output_file is not None:
         summary.to_csv(output_file, index=False)

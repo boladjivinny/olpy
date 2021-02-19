@@ -1,31 +1,75 @@
-from .__iellip import IELLIP
-from .__nherd import NHerd
-from .__ogd import OGD
-from .__pa import PA, PA_I, PA_II
-from .__perceptron import Perceptron, SecondOrderPerceptron
-from .__alma import ALMA
-from .__arow import AROW
-from .__cw import CW, SCW, SCW2
-from .__narow import NAROW
-from .__romma import ROMMA, aROMMA 
+# -*- coding: utf-8 -*-
+"""The repository of all the binary classifiers implemented with the package.
 
-all(
-    [
-        IELLIP,
-        NHerd,
-        OGD,
-        PA,
-        PA_I,
-        PA_II,
-        Perceptron,
-        SecondOrderPerceptron,
-        ALMA,
-        AROW,
-        CW,
-        SCW,
-        SCW2,
-        NAROW,
-        ROMMA,
-        aROMMA
-    ]
-)
+This module exposes a series of `online machine learning`_ models that can
+be used for binary classification. The models learn by taking one data point
+at a time and can achieve very good accuracy results.
+
+One of the features of the models is to allow for usage of class weights 
+during the training process. They also permit to train using a single
+data point with the `partial_fit` method.
+
+
+Examples:
+    Training a model
+
+    >>> from olpy.classifiers import AROW
+    >>> from olpy.datasets import load_a1a
+    >>> from sklearn.metrics import accuracy_score
+    >>> a1a = load_a1a()
+    >>> model = AROW(random_state = 32)
+    >>> _ = model.fit(a1a.train_data, a1a.train_target)
+    >>> prediction = model.predict(a1a.test_data)
+    >>> accuracy_score(a1a.test_target, prediction)
+    0.8379312572683809
+
+    Using the weights to change the performance
+
+    >>> model = AROW(random_state=32, class_weight=np.array([0.4, 0.6]))
+    >>> _ = model.fit(a1a.train_data, a1a.train_target)
+    >>> prediction = model.predict(a1a.test_data)
+    >>> accuracy_score(a1a.test_target, prediction)
+    0.838254296417262
+
+    Doing a partial learn (meant for `active learning` processes)
+
+    >>> from random import random
+    >>> model = AROW(random_state = 32)
+    >>> prediction = model.predict(a1a.test_data)
+    >>> for i in random.sample(range(a1a.train_data.shape[0]), k=10):
+    ...     model = model.partial_fit(a1a.train_data[i], a1a.train_target[i])
+    >>> accuracy_score(a1a.test_target, prediction)
+    0.1364194340354051
+
+
+.. _online machine learning:
+   https://en.wikipedia.org/wiki/Online_machine_learning
+
+.. _ active learning:
+   https://en.wikipedia.org/wiki/Active_learning_(machine_learning)
+
+"""
+
+__all__ = [
+    'IELLIP', 'NHerd', 'OGD', 'PA', 'PA_I', 'PA_II', 'Perceptron', 
+    'SecondOrderPerceptron', 'ALMA', 'AROW', 'CW', 'SCW', 'SCW2', 
+    'NAROW', 'ROMMA', 'aROMMA', 'ECCW'
+]
+
+from . iellip import IELLIP
+from . nherd import NHerd
+from . ogd import OGD
+from . pa import PA
+from . pa1 import PA_I
+from . pa2 import PA_II
+from . perceptron import Perceptron
+from . sop import SecondOrderPerceptron
+from . alma import ALMA
+from . arow import AROW
+from . cw import CW
+from . scw import SCW
+from . scw2 import SCW2
+from . eccw import ECCW
+from . narow import NAROW
+from . romma import ROMMA
+from . aromma import aROMMA 

@@ -1,4 +1,4 @@
-from olpy._model import OnlineLearningModel
+from olpy.model import OnlineLearningModel
 
 all(
     [

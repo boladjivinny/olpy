@@ -1,7 +1,6 @@
-from ._labels import LabelEncoder
+"""This module contains all the files related to pre-processing tasks.
+"""
 
-all(
-    [
-        LabelEncoder
-    ]
-)
+__all__ = ['LabelEncoder']
+
+from .labels import LabelEncoder
