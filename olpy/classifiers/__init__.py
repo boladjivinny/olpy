@@ -25,7 +25,7 @@ Examples:
 
     Using the weights to change the performance
 
-    >>> model = AROW(random_state=32, class_weight=np.array([0.4, 0.6]))
+    >>> model = AROW(random_state=32, class_weight=np.list([0.4, 0.6]))
     >>> _ = model.fit(a1a.train_data, a1a.train_target)
     >>> prediction = model.predict(a1a.test_data)
     >>> accuracy_score(a1a.test_target, prediction)

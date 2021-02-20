@@ -5,7 +5,7 @@ from . dataset import Dataset
 DATA_DIR = Path(__file__).parent / 'data'
 
 def load_a1a():
-    """" Loads the `a1a` dataset for usage in a program.
+    """"Loads the `a1a` dataset for usage in a program.
 
     Args:
         None
@@ -26,7 +26,7 @@ def load_a1a():
     return Dataset(DATA_DIR / 'a1a', DATA_DIR / 'a1a.t', '0')
 
 def load_svmguide1():
-    """" Loads the `svmguide1` dataset for usage in a program.
+    """"Loads the `svmguide1` dataset for usage in a program.
 
     Args:
         None
@@ -44,7 +44,7 @@ def load_svmguide1():
     return Dataset(DATA_DIR / 'svmguide1', DATA_DIR / 'svmguide1.t', '0')
 
 def load_svmguide3():
-    """" Loads the `svmguide3` dataset for usage in a program.
+    """"Loads the `svmguide3` dataset for usage in a program.
 
     Args:
         None

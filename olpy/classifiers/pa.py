@@ -43,14 +43,14 @@ class PA(OnlineLearningModel):
         )
 
     def _update(self, x: np.ndarray, y: int):
-        """ Updates the weight vector in case a mistake occured.
+        """Updates the weight vector in case a mistake occured.
         
         When presented with a data point, this method evaluates
         the error and based on the result, updates or not the 
         weights vector.
 
         Args:
-            x (:obj:`np.ndarray` or `array`): An array representing
+            x (:obj:`np.ndarray` or `list`): An array representing
                 one single data point. Array needs to be 2D.
             y (`int`): Output value for the data point. Takes value
                 between 1 and -1.
@@ -71,11 +71,11 @@ class PA(OnlineLearningModel):
                             * y * x * self.class_weight_[y])
 
     def _get_gamma(self, loss, s_t):
-        """ Computes the coefficient used to update the weight vector.
+        """Computes the coefficient used to update the weight vector.
 
         Args:
-            loss(float): Loss incurred on the current instance.
-            s_t (float): the L2-norm of the vector representing the
+            loss(:obj:`float`): Loss incurred on the current instance.
+            s_t (:obj:`float`): the L2-norm of the vector representing the
                 current instance.
 
         Returns:

@@ -276,7 +276,7 @@ if __name__ == '__main__':
             'Training-Time', 'Prediction-Time', 'Accuracy', 'F1-Score', 
             'Recall', 'ROC_AUC-Score', 'FP', 'FN', 'TP', 'TN'
         ])
-    summary.insert(0, 'Model', [model.name for model in models_])
+    summary.insert(0, 'Model', [model for model in models])
 
     if verbose > 0:
         print(

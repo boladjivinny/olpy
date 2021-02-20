@@ -6,15 +6,15 @@ from . scw import SCW
 
 
 class SCW2(SCW):
-    """ Soft Confidence Weighted variant 2 model.
+    """Soft Confidence Weighted variant 2 model.
 
     Wang, J.; Zhao, P. & Hoi, S. C. H.
         Exact Soft Confidence-Weighted learning 
         CoRR, 112, abs/1206.4612
     
     Attributes:
-        eta (float, optional): Mean weight value. Defaults to 0.7.
-        C (float, optional): Initial variance parameter, `C > 0`.
+        eta (:obj:`float`, optional): Mean weight value. Defaults to 0.7.
+        C (:obj:`float`, optional): Initial variance parameter, `C > 0`.
             Defaults to 1.
         num_iterations (:obj:`int`, optional): Number of iterations 
             to run the training for. Defaults to 1.
@@ -33,15 +33,15 @@ class SCW2(SCW):
     """
     
     def _get_alpha(self, m_t, v_t):
-        """ Computes the alpha for the CW/SCW algorithms.
+        """Computes the alpha for the CW/SCW algorithms.
         
         The `alpha` variable is used to determine the magnitude of
         update that needs to be applied to the weights.
 
         Args:
-            m_t (float): Represents whether there was an error in
+            m_t (:obj:`float`): Represents whether there was an error in
                 prediction or not. 1 for no error, -1 otherwise.
-            v_t (float): Represents how far the point was from its
+            v_t (:obj:`float`): Represents how far the point was from its
                 actual value.
 
         Returns:

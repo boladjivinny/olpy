@@ -1,19 +1,19 @@
 import numpy as np
 
-from olpy import OnlineLearningModel
+from . __base import OnlineLearningModel
 
 
 class NHerd(OnlineLearningModel):
-    """ Gaussian Herding model.
+    """Gaussian Herding model.
 
     Crammer, K. & Lee, D., Learning via gaussian herding, Advances
     in Neural Information Processing Systems, Curran Associates, 
     Inc., 110, 23, 451-459
     
     Attributes:
-        a (float, optional): Trade-off parameter. `a` is in the range
+        a (:obj:`float`, optional): Trade-off parameter. `a` is in the range
             `[0,1]`. Defaults to 1.
-        C (float, optional): Gaussia Herding's parameter with `C > 0`.
+        C (:obj:`float`, optional): Gaussia Herding's parameter with `C > 0`.
             Defaults to 1.
         num_iterations (:obj:`int`, optional): Number of iterations 
             to run the training for. Defaults to 1.
@@ -51,14 +51,14 @@ class NHerd(OnlineLearningModel):
         self._sigma = None
 
     def _update(self, x: np.ndarray, y: int):
-        """ Updates the weight vector in case a mistake occured.
+        """Updates the weight vector in case a mistake occured.
         
         When presented with a data point, this method evaluates
         the error and based on the result, updates or not the 
         weights vector.
 
         Args:
-            x (:obj:`np.ndarray` or `array`): An array representing
+            x (:obj:`np.ndarray` or `list`): An array representing
                 one single data point. Array needs to be 2D.
             y (`int`): Output value for the data point. Takes value
                 between 1 and -1.
@@ -86,7 +86,7 @@ class NHerd(OnlineLearningModel):
                             * sigma.T @ sigma))
 
     def _setup(self, X: np.ndarray):
-        """ Initializes the values for the model' parameters.
+        """Initializes the values for the model' parameters.
 
         Based on the data in argument, this method initializes 
         the covariance matrix `sigma`.
@@ -101,13 +101,13 @@ class NHerd(OnlineLearningModel):
         self._sigma = self._a * np.eye(X.shape[1])
 
     def get_params(self, deep=True):
-        """ Get parameters for this estimator.
+        """Get parameters for this estimator.
 
         This function is for use with hyper-parameter tuning utilities
         such as `GridSearchCV`_.
 
         Args:
-            deep(bool, optional): If True, will return the parameters
+            deep(:obj:`bool`, optional): If True, will return the parameters
             for this estimator and contained sub-objects that are 
             estimators. Defaults to True.
 

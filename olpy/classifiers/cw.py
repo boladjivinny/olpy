@@ -6,7 +6,7 @@ from . __base import OnlineLearningModel
 
 
 class CW(OnlineLearningModel):
-    """ The Confidence-Weighted model.
+    """The Confidence-Weighted model.
 
     Dredze, M.; Crammer, K. & Pereira, F.
     Confidence-Weighted linear classification 
@@ -14,23 +14,28 @@ class CW(OnlineLearningModel):
     Association for Computing Machinery, 108, 264-271
     
     Attributes:
-        a (float, optional): Initial variance parameter, `a > 0`.
+
+        a (:obj:`float`, optional): Initial variance parameter, a > 0
             Defaults to 1.
-        eta (float, optional): Mean weight value. Defaults to 0.7.
-        num_iterations (:obj:`int`, optional): Number of iterations 
-            to run the training for. Defaults to 1.
+
+        eta (:obj:`float`, optional): Mean weight value. 
+            Defaults to 0.7.
+
+        num_iterations (:obj:`int`, optional): 
+            Number of iterations to run the training for. Defaults to 1.
+
         random_state (:obj:`int`, optional): The random seed to use 
-            with the pseudo-random generator. Defaults to `None`.
+            with the pseudo-random generator. Defaults to None.
+
         positive_label (:obj:`int`, optional): The number in the output
             field that represents the positive label. The value passed
             should be different than -1. Defaults to 1.
+
         class_weight (:obj:`dict`, optional): Represents the relative 
-            weight of the labels in the data. Useful for imbalanced 
-            classification tasks.
+            weight of the labels in the data. Useful for imbalanced classification tasks.
 
     Raises:
-        AssertionError: if `positive_label` is equal to -1.
-
+        AssertionError: if positive_label is equal to -1.
     """
     
     def __init__(
@@ -52,14 +57,14 @@ class CW(OnlineLearningModel):
         self._eta = eta
 
     def _update(self, x: np.ndarray, y: int):
-        """ Updates the weight vector in case a mistake occured.
+        """Updates the weight vector in case a mistake occured.
         
         When presented with a data point, this method evaluates
         the error and based on the result, updates or not the 
         weights vector.
 
         Args:
-            x (:obj:`np.ndarray` or `array`): An array representing
+            x (:obj:`np.ndarray` or `list`): An array representing
                 one single data point. Array needs to be 2D.
             y (`int`): Output value for the data point. Takes value
                 between 1 and -1.
@@ -86,15 +91,15 @@ class CW(OnlineLearningModel):
             self._sigma -= beta_t * sigma.T @ sigma
 
     def _get_alpha(self, m_t, v_t):
-        """ Computes the alpha for the CW/SCW algorithms.
+        """Computes the alpha for the CW/SCW algorithms.
         
         The `alpha` variable is used to determine the magnitude of
         update that needs to be applied to the weights.
 
         Args:
-            m_t (float): Represents whether there was an error in
+            m_t (:obj:`float`): Represents whether there was an error in
                 prediction or not. 1 for no error, -1 otherwise.
-            v_t (float): Represents how far the point was from its
+            v_t (:obj:`float`): Represents how far the point was from its
                 actual value.
 
         Returns:
@@ -106,7 +111,7 @@ class CW(OnlineLearningModel):
                         / (v_t * self._xi)))
 
     def _setup(self, X: np.ndarray):
-        """ Initializes the values for the model' parameters.
+        """Initializes the values for the model' parameters.
 
         Based on the data in argument, this method initializes 
         the parameters `sigma`, `phi`, `psi` and `x_i`.
@@ -124,13 +129,13 @@ class CW(OnlineLearningModel):
         self._xi = 1 + self._phi ** 2
 
     def get_params(self, deep=True):
-        """ Get parameters for this estimator.
+        """Get parameters for this estimator.
 
         This function is for use with hyper-parameter tuning utilities
         such as `GridSearchCV`_.
 
         Args:
-            deep(bool, optional): If True, will return the parameters
+            deep(:obj:`bool`, optional): If True, will return the parameters
             for this estimator and contained sub-objects that are 
             estimators. Defaults to True.
 

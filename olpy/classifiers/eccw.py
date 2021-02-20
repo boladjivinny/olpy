@@ -6,7 +6,7 @@ from . cw import CW
 
 
 class ECCW(CW):
-    """ The Exact convex confidence-weighted learning model.
+    """The Exact convex confidence-weighted learning model.
 
     Crammer, K.; Dredze, M. & Pereira, F.
     Koller, D.; Schuurmans, D.; Bengio, Y. & Bottou, L. (Eds.)
@@ -15,9 +15,9 @@ class ECCW(CW):
     Curran Associates, Inc., 109, 21, 345-352
     
     Attributes:
-        a (float, optional): Initial variance parameter, `a > 0`.
+        a (:obj:`float`, optional): Initial variance parameter, `a > 0`.
             Defaults to 1.
-        eta (float, optional): Mean weight value. Defaults to 0.7.
+        eta (:obj:`float`, optional): Mean weight value. Defaults to 0.7.
         num_iterations (:obj:`int`, optional): Number of iterations 
             to run the training for. Defaults to 1.
         random_state (:obj:`int`, optional): The random seed to use 
@@ -46,15 +46,15 @@ class ECCW(CW):
         )
 
     def _get_alpha(self, m_t, v_t):
-                """ Computes the alpha for the CW/SCW algorithms.
+        """Computes the alpha for the CW/SCW algorithms.
         
         The `alpha` variable is used to determine the magnitude of
         update that needs to be applied to the weights.
 
         Args:
-            m_t (float): Represents whether there was an error in
+            m_t (:obj:`float`): Represents whether there was an error in
                 prediction or not. 1 for no error, -1 otherwise.
-            v_t (float): Represents how far the point was from its
+            v_t (:obj:`float`): Represents how far the point was from its
                 actual value.
 
         Returns:

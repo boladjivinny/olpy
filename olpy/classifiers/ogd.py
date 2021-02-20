@@ -3,7 +3,7 @@ import math
 
 from sklearn.metrics import (zero_one_loss, log_loss, mean_squared_error,
                              hinge_loss)
-from olpy import OnlineLearningModel
+from . __base import OnlineLearningModel
 
 
 class OGD(OnlineLearningModel):
@@ -14,7 +14,7 @@ class OGD(OnlineLearningModel):
     Machine Learning, 103, 928-936
     
     Attributes:
-        C (float, optional): OGD's parameter. Defaults to 1.
+        C (:obj:`float`, optional): OGD's parameter. Defaults to 1.
         loss_function (callable, optional): Loss function used to 
             evaluate the need to update the model. Defaults to 
             sklearn.metrics.zero_one_loss
@@ -54,14 +54,14 @@ class OGD(OnlineLearningModel):
         self._t = 0
 
     def _update(self, x: np.ndarray, y: int):
-        """ Updates the weight vector in case a mistake occured.
+        """Updates the weight vector in case a mistake occured.
         
         When presented with a data point, this method evaluates
         the error and based on the result, updates or not the 
         weights vector.
 
         Args:
-            x (:obj:`np.ndarray` or `array`): An array representing
+            x (:obj:`np.ndarray` or `list`): An array representing
                 one single data point. Array needs to be 2D.
             y (`int`): Output value for the data point. Takes value
                 between 1 and -1.
@@ -99,13 +99,13 @@ class OGD(OnlineLearningModel):
         self._t += 1
 
     def get_params(self, deep=True):
-        """ Get parameters for this estimator.
+        """Get parameters for this estimator.
 
         This function is for use with hyper-parameter tuning utilities
         such as `GridSearchCV`_.
 
         Args:
-            deep(bool, optional): If True, will return the parameters
+            deep(:obj:`bool`, optional): If True, will return the parameters
             for this estimator and contained sub-objects that are 
             estimators. Defaults to True.
 
@@ -120,7 +120,7 @@ class OGD(OnlineLearningModel):
         return params
 
     def _setup(self, X):
-        """ Initializes the values for the model' parameters.
+        """Initializes the values for the model' parameters.
 
         Based on the data in argument, this method initializes 
         the parameters `t` (number of iterations).

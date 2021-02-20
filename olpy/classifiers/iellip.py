@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from olpy import OnlineLearningModel
+from . __base import OnlineLearningModel
 
 
 class IELLIP(OnlineLearningModel):
@@ -12,12 +12,12 @@ class IELLIP(OnlineLearningModel):
     Computing Machinery, 109, 1153-1160
     
     Attributes:
-        a (float, optional): Trade-off parameter. `a` is in the range 
-        `[0,1]`. Defaults to 1.
-        b (float, optional): Parameters controlling the memory of 
+        a (:obj:`float`, optional): Trade-off parameter. `a` is in the range 
+            `[0,1]`. Defaults to 1.
+        b (:obj:`float`, optional): Parameters controlling the memory of 
             online learning. `b` is in the range `[0,1]`. Defaults to
             `0.3`
-        c (float, optional): Parameters controlling the memory of 
+        c (:obj:`float`, optional): Parameters controlling the memory of 
             online learning. `c` is in the range `[0,1]`. Defaults to
             `0.1`
         num_iterations (:obj:`int`, optional): Number of iterations 
@@ -58,14 +58,14 @@ class IELLIP(OnlineLearningModel):
         self._sigma = None
 
     def _update(self, x, y):
-        """ Updates the weight vector in case a mistake occured.
+        """Updates the weight vector in case a mistake occured.
         
         When presented with a data point, this method evaluates
         the error and based on the result, updates or not the 
         weights vector.
 
         Args:
-            x (:obj:`np.ndarray` or `array`): An array representing
+            x (:obj:`np.ndarray` or `list`): An array representing
                 one single data point. Array needs to be 2D.
             y (`int`): Output value for the data point. Takes value
                 between 1 and -1.
@@ -94,7 +94,7 @@ class IELLIP(OnlineLearningModel):
         self._c *= self._b
 
     def _setup(self, X: np.ndarray):
-        """ Initializes the values for the model' parameters.
+        """Initializes the values for the model' parameters.
 
         Based on the data in argument, this method initializes 
         the covariance matrix `sigma`.
@@ -109,13 +109,13 @@ class IELLIP(OnlineLearningModel):
         self._sigma = self._a * np.eye(X.shape[1])
 
     def get_params(self, deep=True):
-        """ Get parameters for this estimator.
+        """Get parameters for this estimator.
 
         This function is for use with hyper-parameter tuning utilities
         such as `GridSearchCV`_.
 
         Args:
-            deep(bool, optional): If True, will return the parameters
+            deep(:obj:`bool`, optional): If True, will return the parameters
             for this estimator and contained sub-objects that are 
             estimators. Defaults to True.
 

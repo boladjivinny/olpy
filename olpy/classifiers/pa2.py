@@ -12,7 +12,7 @@ class PA_II(PA):
 
     
     Attributes:
-        C (float, optional): Aggressiveness parameter with `C>0`.
+        C (:obj:`float`, optional): Aggressiveness parameter with `C>0`.
             Defaults to 1.
         num_iterations (:obj:`int`, optional): Number of iterations 
             to run the training for. Defaults to 1.
@@ -28,7 +28,7 @@ class PA_II(PA):
     Raises:
         AssertionError: if `positive_label` is equal to -1.
 
-    """            
+    """         
     def __init__(
         self, 
         C=1, 
@@ -46,11 +46,11 @@ class PA_II(PA):
         self._C = C
 
     def _get_gamma(self, loss, s_t):
-        """ Computes the coefficient used to update the weight vector.
+        """Computes the coefficient used to update the weight vector.
 
         Args:
-            loss(float): Loss incurred on the current instance.
-            s_t (float): the L2-norm of the vector representing the
+            loss(:obj:`float`): Loss incurred on the current instance.
+            s_t (:obj:`float`): the L2-norm of the vector representing the
                 current instance.
 
         Returns:
@@ -59,13 +59,13 @@ class PA_II(PA):
         return loss / (s_t + (1/(2 * self._C)))
 
     def get_params(self, deep=True):
-        """ Get parameters for this estimator.
+        """Get parameters for this estimator.
 
         This function is for use with hyper-parameter tuning utilities
         such as `GridSearchCV`_.
 
         Args:
-            deep(bool, optional): If True, will return the parameters
+            deep(:obj:`bool`, optional): If True, will return the parameters
             for this estimator and contained sub-objects that are 
             estimators. Defaults to True.
 

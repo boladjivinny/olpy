@@ -4,7 +4,7 @@ from olpy.exceptions import NotFittedError
 
 
 class LabelEncoder:
-    """ Encodes an output vector to match the specifications.
+    """Encodes an output vector to match the specifications.
 
     Given that online learning algorithms usually work on output 
     vectors with entries (-1, 1), this function performs this action
@@ -24,13 +24,13 @@ class LabelEncoder:
         self.labels = None
 
     def fit(self, y):
-        """ Fits the output vector y.
+        """Fits the output vector y.
 
         This method parses the parsed value and sets the necessary 
         values to transform it later.
 
         Args:
-            y (:obj:`array` of `ndarray`): the data to be transformed.
+            y (:obj:`list` or `numpy.ndarray`): the data to be transformed.
 
         Returns:
             self: the current instance.
@@ -61,7 +61,7 @@ class LabelEncoder:
         return self
 
     def transform(self, return_labels=True):
-        """ Transforms the data.
+        """Transforms the data.
 
         Based on the information collected while fitting, this fuction
         returns the transformed labels that can be used directly for
@@ -97,23 +97,23 @@ class LabelEncoder:
                 else -1 for i in range(self.y.shape[0])])
 
     def fit_transform(self, y, return_labels=True):
-        """ Fits and transforms the data.
+        """Fits and transforms the data.
 
         Combines the actions of `fit` and `transform` methods.
 
         Args:
-            return_labels (bool, optional): whether the labels should
+            return_labels (:obj:`bool`, optional): whether the labels should
                 be returned or not. Default `True`.
             y (:obj:`array` of `ndarray`): the data to be transformed.
 
-            Returns:
-                `numpy.ndarray` if return_labels is True else None
+        Returns:
+            `numpy.ndarray` if return_labels is True else None
 
-            Raises:
-                ValueError: if the number of labels is different than 2.
-                AssertionError: if the positive label is not found in the
+        Raises:
+            ValueError: if the number of labels is different than 2.
+            AssertionError: if the positive label is not found in the
                     labels.
-                NotFittedError if the encoder was not already fitted.
+            NotFittedError if the encoder was not already fitted.
 
         """
         self.fit(y)

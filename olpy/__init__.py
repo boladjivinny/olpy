@@ -1,7 +1,2 @@
-from olpy.model import OnlineLearningModel
-
-all(
-    [
-        OnlineLearningModel
-    ]
-)
+""" The main module of the OLPy package
+"""

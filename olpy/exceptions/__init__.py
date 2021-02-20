@@ -1,4 +1,4 @@
-""" This module contains the custom exceptions of the package.
+"""This module contains the custom exceptions of the package.
 """
 
 __all__ = ['NotFittedError']

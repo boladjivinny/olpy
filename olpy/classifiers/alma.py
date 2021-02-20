@@ -3,11 +3,11 @@ import math
 
 from numpy import linalg as LA
 
-from olpy import OnlineLearningModel
+from . __base import OnlineLearningModel
 
 
 class ALMA(OnlineLearningModel):
-    """ A New Approximate Maximal Margin Classification Algorithm.
+    """A New Approximate Maximal Margin Classification Algorithm.
     
     Gentile, C.
     A New Approximate Maximal Margin Classification Algorithm 
@@ -16,9 +16,9 @@ class ALMA(OnlineLearningModel):
     Attributes:
         p (int, optional): ALMA's order with p strictly greater than 0.
             Defaults to 2.
-        C (float, optional): Parameter of ALMA with C strictly greater
+        C (:obj:`float`, optional): Parameter of ALMA with C strictly greater
             than 0. Defaults to 1.
-        alpha (float, optional): The sensitivity of the model. `alpha` 
+        alpha (:obj:`float`, optional): The sensitivity of the model. `alpha` 
             takes values between 0 (non-inclusive). Defaults to 1.
         num_iterations (:obj:`int`, optional): Number of iterations 
             to run the training for. Defaults to 1.
@@ -61,14 +61,14 @@ class ALMA(OnlineLearningModel):
         self._k = 0
 
     def _update(self, x: np.ndarray, y: int):
-        """ Updates the weight vector in case a mistake occured.
+        """Updates the weight vector in case a mistake occured.
         
         When presented with a data point, this method evaluates
         the error and based on the result, updates or not the 
         weights vector.
 
         Args:
-            x (:obj:`np.ndarray` or `array`): An array representing
+            x (:obj:`np.ndarray` or `list`): An array representing
                 one single data point. Array needs to be 2D.
             y (`int`): Output value for the data point. Takes value
                 between 1 and -1.
@@ -89,7 +89,7 @@ class ALMA(OnlineLearningModel):
             self._k += 1
 
     def _setup(self, X):
-        """ Initializes the values for the model' parameters.
+        """Initializes the values for the model' parameters.
 
         Based on the data in argument, this method initializes 
         the parameters `k` and `B` of the ALMA algorithm.
@@ -105,13 +105,13 @@ class ALMA(OnlineLearningModel):
         self._B = 1/self._alpha
 
     def get_params(self, deep=True):
-        """ Get parameters for this estimator.
+        """Get parameters for this estimator.
 
         This function is for use with hyper-parameter tuning utilities
         such as `GridSearchCV`_.
 
         Args:
-            deep(bool, optional): If True, will return the parameters
+            deep(:obj:`bool`, optional): If True, will return the parameters
             for this estimator and contained sub-objects that are 
             estimators. Defaults to True.
 

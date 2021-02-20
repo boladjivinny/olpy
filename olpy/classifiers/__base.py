@@ -54,11 +54,11 @@ class OnlineLearningModel:
         Args:
             X (:obj:`numpy.ndarray`): Input data with n rows and
                 m columns
-            Y (:obj:`, `numpy.ndarray`): Output variable with binary
+            Y (:obj:`numpy.ndarray`): Output variable with binary
                 labels.
-            verbose (bool, optional): Specifies whether the performances
-                should be reported on the console or not. Defaults to False.
-            **kwargs: Arbitrary keyword arguments.
+            verbose (:obj:`bool`, optional): Specifies whether the 
+                performances should be reported or not. Defaults to False.
+            ** kwargs: Arbitrary keyword arguments.
         
         Returns:
             self: the trained model.
@@ -83,7 +83,6 @@ class OnlineLearningModel:
         for iteration in range(1, self.num_iterations + 1):
             start = time.time()
             idx = random.sample(range(X.shape[0]), k=X.shape[0])
-            print(type(X))
             for x, y in zip(X[idx, :], y_transformed[idx]):
                 self._update(x, y)
 
@@ -97,17 +96,17 @@ class OnlineLearningModel:
         return self
 
     def partial_fit(self, x, y, classes=[0, 1]):
-        """ Trains the model on a single data point
+        """Trains the model on a single data point.
 
         Args:
 
-            x (:obj: `array` or `numpy.ndarray`): Input vector 
-                for one data point. 
+            x (:obj:`list` or `numpy.ndarray`): Input vector 
+              for one data point. 
 
             y (int): Integer representing the output variable.
                 Value should be one of the labels.
 
-            classes (:obj:`array` or `tuple`, optional): Represents the
+            classes (:obj:`list` or `tuple`, optional): Represents the
                 available labels in the dataset. Needs to be passed only
                 once.
         
@@ -126,14 +125,14 @@ class OnlineLearningModel:
         return self
 
     def _update(self, x: np.ndarray, y: int):
-        """ Updates the weight vector in case a mistake occured.
+        """Update the weight vector in case a mistake occured.
         
         When presented with a data point, this method evaluates
         the error and based on the result, updates or not the 
         weights vector.
 
         Args:
-            x (:obj:`np.ndarray` or `array`): An array representing
+            x (:obj:`np.ndarray` or `list`): An array representing
                 one single data point. Array needs to be 2D.
             y (`int`): Output value for the data point. Takes value
                 between 1 and -1.
@@ -147,7 +146,7 @@ class OnlineLearningModel:
         return NotImplementedError
 
     def _setup(self, X: np.ndarray):
-        """ Performs model's specific initialization steps.
+        """Perform model's specific initialization steps.
 
         This methods performs a series of initialization that cannot
         be done properly in the constructor. It is implemented 
@@ -163,13 +162,13 @@ class OnlineLearningModel:
         return NotImplemented
 
     def predict(self, X):
-        """ Predicts the label given the test dataset X.
+        """Predict the label given the test dataset X.
 
         Given an unlabelled data, this function predicts the labels to
         be assigned to it based on the weights learned so far.
 
         Args:
-            X (:obj:`numpy.ndarray` or `array`): unlabelled data.
+            X (:obj:`numpy.ndarray` or `list`): unlabelled data.
         
         Returns:
             np.ndarray with dimension (n,) representing the output 
@@ -186,7 +185,7 @@ class OnlineLearningModel:
         return [self.labels[0] if val <= 0 else 1 for val in X @ self.weights]
 
     def score(self, X, y):
-        """ Computes the score performed on the dataset.
+        """Compute the score performed on the dataset.
 
         Given a labelled data, this method evaluate the performance of
         the models by predicting and computing the accuracy score.
@@ -208,7 +207,7 @@ class OnlineLearningModel:
         return np.count_nonzero(self.predict(X) == y) / X.shape[0]
 
     def decision_function(self, X):
-        """ Computes the values of the decision boundaries.
+        """Compute the values of the decision boundaries.
 
         Given an unlabelled data, this method computes the probabilities
         of being assigned the positive label.
@@ -218,13 +217,13 @@ class OnlineLearningModel:
                     m columns
 
         Returns:
-            array[float]: The probabilities for each data point to be
+            list[float]: The probabilities for each data point to be
             of the positive class label.
         """
         return X @ self.weights
 
     def predict_proba(self, X):
-        """ Compute the probability that a model is from a class.
+        """Compute the probability that a model is from a class.
 
         Given an unlabelled data, this method returns the probability
         for each data point to belong to either class.
@@ -233,10 +232,9 @@ class OnlineLearningModel:
             X (:obj:`numpy.ndarray`): Input data with n rows and
                     m columns
 
-        Returns
-        -------
-            :obj:`array` of size (n, 2): the probabilities of the 
-            data points belonging to each class.
+        Returns:
+            :obj:`list` of size (n, 2): the probabilities of the 
+                data points belonging to each class.
         """
         pred = (X @ self.weights).tolist()
         probs = []
@@ -245,13 +243,13 @@ class OnlineLearningModel:
         return probs
 
     def get_params(self, deep=True):
-        """ Get parameters for this estimator.
+        """Get parameters for this estimator.
 
         This function is for use with hyper-parameter tuning utilities
         such as `GridSearchCV`_.
 
         Args:
-            deep(bool, optional): If True, will return the parameters
+            deep(:obj:`bool`, optional): If True, will return the parameters
             for this estimator and contained sub-objects that are 
             estimators. Defaults to True.
 
@@ -265,7 +263,7 @@ class OnlineLearningModel:
         }
 
     def set_params(self, **parameters):
-        """ Set the parameters of this estimator.
+        """Set the parameters of this estimator.
 
         The method works on simple estimators as well as on nested 
         objects (such as Pipeline). The latter have parameters of the
@@ -273,7 +271,7 @@ class OnlineLearningModel:
         each component of a nested object.
 
         Args:
-            **parameters (:obj:`dict`): Estimator parameters.
+            ** parameters (:obj:`dict`): Estimator parameters.
 
         Returns:
             self: estimator instance.

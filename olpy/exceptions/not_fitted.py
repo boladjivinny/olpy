@@ -1,5 +1,5 @@
 class NotFittedError(Exception):
-    """ Raised when an unfitted model is used for a prediction
+    """Raised when an unfitted model is used for a prediction
 
     Attributes:
         previous (str): state at beginning of transition.
