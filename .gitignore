@@ -2,3 +2,6 @@
 __pycache__/
 experiment-results.csv
 *.out
+build/
+dist
+olpy.egg-info

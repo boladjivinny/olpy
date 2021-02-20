@@ -19,6 +19,8 @@ from pathlib import Path
 #OLPY_DIR = Path(__file__).parent.parent.parent
 sys.path.insert(0, os.path.abspath("../.."))
 
+from olpy.classifiers import *
+
 
 # -- Project information -----------------------------------------------------
 
