@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath(str(OLPY_DIR)))
 
 # -- Project information -----------------------------------------------------
 
-project = 'OLPy'
+project = 'OLPy, the package for online learning with Python.'
 copyright = '2021, Boladji Vinny'
 author = 'Boladji Vinny'
 
