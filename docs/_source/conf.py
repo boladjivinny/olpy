@@ -16,8 +16,8 @@ import os
 import sys
 from pathlib import Path
 
-OLPY_DIR = Path(__file__).parent.parent.parent
-sys.path.insert(0, os.path.abspath(str(OLPY_DIR)))
+#OLPY_DIR = Path(__file__).parent.parent.parent
+sys.path.insert(0, os.path.abspath("../.."))
 
 
 # -- Project information -----------------------------------------------------
