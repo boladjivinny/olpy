@@ -48,8 +48,8 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme',
-    'sphinx_automodapi.automodapi',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosummary'
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
