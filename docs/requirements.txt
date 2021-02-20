@@ -3,5 +3,4 @@ sphinx-rtd-theme
 numpy
 pandas
 joblib
-pkg_resources
 sklearn
