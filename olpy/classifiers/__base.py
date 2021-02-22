@@ -179,7 +179,7 @@ class OnlineLearningModel:
             fitting.
         """
         if self.weights is None : 
-            raise NotFittedError(f"{self.name} untrained",
+            raise NotFittedError("model instance is untrained",
                                  "Attempted to predict using the model", 
                                 "This model has not yet been fitted")
         return [self.labels[0] if val <= 0 else 1 for val in X @ self.weights]
