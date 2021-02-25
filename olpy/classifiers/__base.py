@@ -28,11 +28,11 @@ class OnlineLearningModel:
     """
 
     def __init__(
-        self, 
-        num_iterations=1, 
-        random_state=None, 
-        positive_label=1, 
-        class_weight=None
+            self,
+            num_iterations=1,
+            random_state=None,
+            positive_label=1,
+            class_weight=None
     ):
         self.weights = None
         self.labels = None
@@ -68,9 +68,9 @@ class OnlineLearningModel:
         self.weights = np.zeros(X.shape[1])
         y_transformed, self.labels = LabelEncoder(
             positive_label=self.positive_label).fit_transform(
-                Y, 
-                return_labels=True
-                )
+            Y,
+            return_labels=True
+        )
         if self.class_weight is not None:
             weights = self.class_weight / sum(self.class_weight)
             self.class_weight_ = {
@@ -89,13 +89,13 @@ class OnlineLearningModel:
             if verbose:
                 prediction = self.predict(X)
                 print('Iteration ({}/{}) \tRuntime: {}s \tAccuracy:  {}/{}'.
-                      format(
-                          iteration, self.num_iterations, 
-                          time.time() - start,
-                          np.count_nonzero(prediction == Y), X.shape[0]))
+                    format(
+                    iteration, self.num_iterations,
+                    time.time() - start,
+                    np.count_nonzero(prediction == Y), X.shape[0]))
         return self
 
-    def partial_fit(self, x, y, classes=[0, 1]):
+    def partial_fit(self, x, y, classes=None):
         """Trains the model on a single data point.
 
         Args:
@@ -116,12 +116,12 @@ class OnlineLearningModel:
         # Set the value to -1 
         if y != self.positive_label:
             y = -1
-        self.labels = classes
-        if self.weights is None: 
-            self._setup(np.expand_dims(x, axis=0))
-            self.weights = np.zeros(len(x))
+        self.labels = classes if classes else [0, 1]
+        if self.weights is None:
+            self._setup(x)
+            self.weights = np.zeros(x.shape[1])
 
-        self._update(x, y)
+        self._update(x.squeeze(), y)
         return self
 
     def _update(self, x: np.ndarray, y: int):
@@ -182,7 +182,7 @@ class OnlineLearningModel:
             raise NotFittedError("model instance of {self.__class__.__name__}\
                                  is untrained",
                                  "Attempted to predict using the model", 
-                                "This model has not yet been fitted")
+                                 "This model has not yet been fitted")
         return [self.labels[0] if val <= 0 else 1 for val in X @ self.weights]
 
     def score(self, X, y):
@@ -259,7 +259,7 @@ class OnlineLearningModel:
 
         """
         return {
-            "num_iterations": self.num_iterations, 
+            "num_iterations": self.num_iterations,
             "class_weight": self.class_weight
         }
 
