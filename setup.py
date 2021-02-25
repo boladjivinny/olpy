@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="olpy",
-    version="1.0.1",
+    version="1.0.0.dev1",
     author="Boladji Vinny",
     author_email="vinny.adjibi@outlook.com",
     description="An online machine learning package for Python",
@@ -21,4 +21,9 @@ setuptools.setup(
     package_data={'': ['data/a1a*', 'data/svmguide*' ]},
     packages=setuptools.find_packages(),
     python_requires='>=3.6',
+    install_requires = [
+        'numpy>=1.20.1',
+        'pandas>=1.1.3',
+        'scikit-learn>=0.24.1',
+    ]
 )

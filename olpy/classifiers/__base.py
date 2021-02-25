@@ -95,16 +95,15 @@ class OnlineLearningModel:
                     np.count_nonzero(prediction == Y), X.shape[0]))
         return self
 
-    def partial_fit(self, x, y, classes=None):
+    def partial_fit(self, X, Y, classes=None):
         """Trains the model on a single data point.
 
         Args:
 
-            x (:obj:`list` or `numpy.ndarray`): Input vector 
-              for one data point. 
-
-            y (int): Integer representing the output variable.
-                Value should be one of the labels.
+            X (:obj:`numpy.ndarray`): Input data with n rows and
+                m columns
+            Y (:obj:`numpy.ndarray`): Output variable with binary
+                labels.
 
             classes (:obj:`list` or `tuple`, optional): Represents the
                 available labels in the dataset. Needs to be passed only
@@ -113,15 +112,17 @@ class OnlineLearningModel:
         Returns:
             self: the trained model.
         """
-        # Set the value to -1 
-        if y != self.positive_label:
-            y = -1
         self.labels = classes if classes else [0, 1]
-        if self.weights is None:
-            self._setup(x)
-            self.weights = np.zeros(x.shape[1])
 
-        self._update(x.squeeze(), y)
+        if self.weights is None:
+            self._setup(X)
+            self.weights = np.zeros(X.shape[1])
+
+        for x, y in zip(X, Y):
+            # Set the value to -1 
+            if y != self.positive_label:
+                y = -1
+            self._update(x.squeeze(), y)
         return self
 
     def _update(self, x: np.ndarray, y: int):

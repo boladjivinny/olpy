@@ -35,11 +35,13 @@ Examples:
 
     >>> import random
     >>> import numpy as np
+    >>> random.seed(32)
     >>> model = AROW(random_state = 32)
     >>> for i in random.sample(range(a1a.train_data.shape[0]), k=10):
-    ...     model = model.partial_fit(np.expand_dims(a1a.train_data[i], axis=0), a1a.train_target[i])
+    ...     model = model.partial_fit(np.expand_dims(a1a.train_data[i], axis=0), [a1a.train_target[i]])
+    >>> prediction = model.predict(a1a.test_data)
     >>> accuracy_score(a1a.test_target, prediction)
-    0.839223413877762
+    0.13551492440883836
 
 
 .. _online machine learning:
