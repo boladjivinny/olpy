@@ -79,6 +79,7 @@ class CW(OnlineLearningModel):
         v_t = x @ np.diag(np.diag(self._sigma)) @ x.T
         m_t = y * decision
         loss = (self._phi * math.sqrt(v_t) - m_t)
+        #print(loss)
         if loss > 0:
             # We scale our learning rate (alpha) using the weight/cost
             alpha_t = self.class_weight_[y] * self._get_alpha(m_t, v_t)

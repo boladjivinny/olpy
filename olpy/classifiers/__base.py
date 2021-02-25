@@ -119,7 +119,7 @@ class OnlineLearningModel:
         self.labels = classes
         if self.weights is None: 
             self._setup(np.expand_dims(x, axis=0))
-            self.weights = np.zeros(x.shape[0])
+            self.weights = np.zeros(len(x))
 
         self._update(x, y)
         return self
@@ -179,7 +179,8 @@ class OnlineLearningModel:
             fitting.
         """
         if self.weights is None : 
-            raise NotFittedError("model instance is untrained",
+            raise NotFittedError("model instance of {self.__class__.__name__}\
+                                 is untrained",
                                  "Attempted to predict using the model", 
                                 "This model has not yet been fitted")
         return [self.labels[0] if val <= 0 else 1 for val in X @ self.weights]
