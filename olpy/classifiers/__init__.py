@@ -33,13 +33,13 @@ Examples:
 
     Doing a partial learn (meant for `active learning` processes)
 
-    >>> from random import random
+    >>> import random
+    >>> import numpy as np
     >>> model = AROW(random_state = 32)
-    >>> prediction = model.predict(a1a.test_data)
     >>> for i in random.sample(range(a1a.train_data.shape[0]), k=10):
-    ...     model = model.partial_fit(a1a.train_data[i], a1a.train_target[i])
+    ...     model = model.partial_fit(np.expand_dims(a1a.train_data[i], axis=0), a1a.train_target[i])
     >>> accuracy_score(a1a.test_target, prediction)
-    0.1364194340354051
+    0.839223413877762
 
 
 .. _online machine learning:
