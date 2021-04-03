@@ -238,11 +238,7 @@ class OnlineLearningModel:
             :obj:`list` of size (n, 2): the probabilities of the 
                 data points belonging to each class.
         """
-        pred = (X @ self.weights).tolist()
-        probs = []
-        probs.append([1 - p for p in pred])
-        probs.append(pred)
-        return probs
+        pass
 
     def get_params(self, deep=True):
         """Get parameters for this estimator.
