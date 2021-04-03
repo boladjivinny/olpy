@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="olpy",
-    version="1.0.0.dev1",
+    version="1.0.0.dev2",
     author="Boladji Vinny",
     author_email="vinny.adjibi@outlook.com",
     description="An online machine learning package for Python",
