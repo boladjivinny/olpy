@@ -91,4 +91,4 @@ The algorithms currently implemented are:
 
 # Getting help
 To get support regarding this package, please log an issue or shoot me an email
-at hello@vinny.coach and I will make sure to answer as soon as possible.
+at vinny.adjibi@outlook.com and I will make sure to answer as soon as possible.
