@@ -34,7 +34,7 @@ class OnlineLearningModel:
             positive_label=1,
             class_weight=None
     ):
-        self. _estimator_type = "classifier"
+        self._estimator_type = "classifier"
         self.weights = None
         self.labels = None
         self.num_iterations = num_iterations
