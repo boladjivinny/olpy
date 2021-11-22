@@ -27,6 +27,7 @@ class OnlineLearningModel:
 
     """
 
+    _estimator_type = "classifier"
     def __init__(
             self,
             num_iterations=1,
