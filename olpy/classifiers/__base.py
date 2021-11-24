@@ -185,7 +185,7 @@ class OnlineLearningModel:
                                  is untrained",
                                  "Attempted to predict using the model", 
                                  "This model has not yet been fitted")
-        return [self.labels[0] if val <= 0 else 1 for val in X @ self.weights]
+        return [self.labels[0] if val <= 0 else self.labels[1] for val in X @ self.weights]
 
     def score(self, X, y):
         """Compute the score performed on the dataset.
